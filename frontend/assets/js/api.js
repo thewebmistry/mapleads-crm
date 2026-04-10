@@ -16,7 +16,10 @@
 
     // Helper function for fetch requests with production error handling
     const apiRequest = async (endpoint, options = {}) => {
-        const url = `${BASE_URL}${endpoint}`;
+        // Determine URL: if endpoint is a full URL, use it; otherwise prepend BASE_URL
+        const url = endpoint.startsWith('http://') || endpoint.startsWith('https://')
+            ? endpoint
+            : `${BASE_URL}${endpoint}`;
         console.log(`API Request: ${url}`, { endpoint, options });
         
         const headers = {
@@ -29,13 +32,27 @@
         const token = localStorage.getItem('token');
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
+        // Setup abort controller for timeout if specified
+        let abortController = null;
+        let timeoutId = null;
+        if (options.timeout && typeof options.timeout === 'number') {
+            abortController = new AbortController();
+            timeoutId = setTimeout(() => {
+                abortController.abort(`Request timeout after ${options.timeout}ms`);
+            }, options.timeout);
+        }
+
         // Default fetch options with credentials for CORS
         const fetchOptions = {
             ...options,
             headers,
             credentials: 'include', // Include cookies for CORS
-            mode: 'cors' // Ensure CORS mode
+            mode: 'cors', // Ensure CORS mode
+            signal: abortController ? abortController.signal : null
         };
+
+        // Remove timeout from fetchOptions to avoid conflicts
+        delete fetchOptions.timeout;
 
         try {
             const response = await fetch(url, fetchOptions);
@@ -77,6 +94,8 @@
             }
             
             throw error;
+        } finally {
+            if (timeoutId) clearTimeout(timeoutId);
         }
     };
 
@@ -113,11 +132,15 @@
             body: JSON.stringify(data)
         }),
 
-        // Generic POST helper for scraper APIs
-        post: (endpoint, payload) => apiRequest(endpoint, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        }),
+        // Generic POST helper for scraper APIs with timeout and safe payload
+        post: (endpoint, payload) => {
+            const body = payload !== undefined ? JSON.stringify(payload) : '{}';
+            return apiRequest(endpoint, {
+                method: 'POST',
+                body,
+                timeout: 60000 // 60 seconds timeout for scraper operations
+            });
+        },
 
         // PUT /api/v1/leads/:id
         updateLead: (id, data) => apiRequest(`/leads/${id}`, {

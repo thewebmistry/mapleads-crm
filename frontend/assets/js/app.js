@@ -59,20 +59,20 @@
         },
 
         /**
-         * Add class to element
+         * Add class(es) to element
          */
-        addClass: function(element, className) {
+        addClass: function(element, ...classNames) {
             if (element) {
-                element.classList.add(className);
+                element.classList.add(...classNames);
             }
         },
 
         /**
-         * Remove class from element
+         * Remove class(es) from element
          */
-        removeClass: function(element, className) {
+        removeClass: function(element, ...classNames) {
             if (element) {
-                element.classList.remove(className);
+                element.classList.remove(...classNames);
             }
         },
 
@@ -213,7 +213,7 @@
             if (sidebar) {
                 // Remove hidden class and add mobile-specific classes
                 AppUtils.removeClass(sidebar, 'hidden');
-                AppUtils.addClass(sidebar, 'fixed', 'inset-y-0', 'left-0', 'z-50', 'lg:hidden');
+                AppUtils.addClass(sidebar, 'fixed', 'inset-y-0', 'left-0', 'z-60', 'lg:hidden', 'max-w-full');
                 // Start off-screen
                 AppUtils.addClass(sidebar, '-translate-x-full');
                 // Force reflow to ensure transition works
@@ -241,7 +241,7 @@
                 setTimeout(() => {
                     if (AppUtils.hasClass(sidebar, '-translate-x-full')) {
                         AppUtils.addClass(sidebar, 'hidden');
-                        AppUtils.removeClass(sidebar, 'fixed', 'inset-y-0', 'left-0', 'z-50', 'lg:hidden', '-translate-x-full');
+                        AppUtils.removeClass(sidebar, 'fixed', 'inset-y-0', 'left-0', 'z-60', 'lg:hidden', 'max-w-full', '-translate-x-full');
                     }
                 }, 300); // Match transition duration
             }
