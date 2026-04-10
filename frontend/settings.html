@@ -1,0 +1,622 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | MapLeads CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+                            400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+                            800: '#1e40af', 900: '#1e3a8a',
+                        },
+                        secondary: {
+                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1',
+                            400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155',
+                            800: '#1e293b', 900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out; }
+        .gradient-icon {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+    <style>
+        .shadow-card-premium { box-shadow: 0 4px 25px -5px rgba(0,0,0,0.1), 0 10px 30px -5px rgba(0,0,0,0.04); }
+        .shadow-glow { box-shadow: 0 0 20px rgba(99,102,241,0.4); }
+
+        /* Custom CSS Animations */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-border {
+            position: relative;
+            background: linear-gradient(white, white) padding-box,
+                        linear-gradient(135deg, #667eea, #764ba2) border-box;
+            border: 2px solid transparent;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .glow {
+            box-shadow: 0 0 20px rgba(99,102,241,0.5);
+        }
+
+        .transition-all-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tab Panel Styles - Enhanced */
+        .tab-panel {
+            opacity: 0;
+            transform: translateY(8px);
+            height: 0;
+            overflow: hidden;
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        height 0.3s ease;
+            pointer-events: none;
+        }
+        .tab-panel.active {
+            opacity: 1;
+            transform: translateY(0);
+            height: auto;
+            overflow: visible;
+            pointer-events: all;
+            display: block;
+        }
+        .tab-button.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5),
+                        0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+                        0 0 20px rgba(99, 102, 241, 0.6);
+            position: relative;
+            z-index: 1;
+        }
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 3px;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.8);
+        }
+        
+        /* Hide scrollbar for horizontal scrolling */
+        .scrollbar-hide {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;     /* Firefox */
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;             /* Chrome, Safari, Opera */
+        }
+        
+        /* Mobile responsive tabs */
+        @media (max-width: 768px) {
+            .tab-button {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+                padding-top: 0.75rem !important;
+                padding-bottom: 0.75rem !important;
+                font-size: 0.875rem;
+                border-radius: 9999px;
+                min-width: auto;
+                flex: 0 1 auto;
+            }
+            .tab-button i {
+                margin-right: 0.5rem;
+            }
+            .tab-button.active::after {
+                width: 40%;
+                bottom: -1px;
+                height: 2px;
+            }
+        }
+        
+        /* Smooth transition for tab buttons */
+        .tab-button {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+    </style>
+    <script>
+        // Initialize dark mode BEFORE page renders
+        (function() {
+            const html = document.documentElement;
+            const savedTheme = localStorage.getItem('darkMode');
+            
+            if (savedTheme === 'true' || (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+            }
+        })();
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-secondary-900 text-gray-900 dark:text-gray-100 min-h-screen">
+    
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-white/90 dark:bg-secondary-800/90 backdrop-blur-xl backdrop-blur-md border-b border-white/20 dark:border-secondary-700/50 shadow-soft">
+        <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center space-x-4">
+                <button id="sidebar-toggle-mobile" class="lg:hidden p-2 rounded-xl hover:bg-secondary-50 dark:hover:bg-secondary-800/50 transition-all duration-300">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="flex items-center">
+                    <div class="h-8 w-8 rounded-xl bg-gradient-to-r from-primary-600 to-purple-600 flex items-center justify-center shadow-glow">
+                        <i class="fas fa-map-marker-alt text-white"></i>
+                    </div>
+                    <span class="ml-3 text-xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">MapLeads</span>
+                    <span class="ml-1 text-sm font-medium text-primary-600 dark:text-primary-400">CRM</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="dark-mode-toggle" class="p-2 rounded-xl hover:bg-secondary-50 dark:hover:bg-secondary-800/50 transition-all duration-300">
+                    <i id="dark-mode-icon" class="fas fa-moon"></i>
+                </button>
+                <div class="h-8 w-8 rounded-full bg-gradient-to-r from-primary-500 to-purple-500 flex items-center justify-center ring-2 ring-primary-500/50 hover:ring-primary-500 transition-all duration-200 shadow-glow">
+                    <i class="fas fa-user text-white"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex h-[calc(100vh-4rem)]">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="hidden lg:flex flex-col bg-white/90 dark:bg-slate-900 backdrop-blur-xl border-r border-gray-200/50 dark:border-slate-800 w-64 transition-all duration-300 shadow-sidebar">
+            <nav class="flex-1 px-4 py-6 space-y-1">
+                <a href="dashboard.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group hover:translate-x-1">
+                    <i class="fas fa-tachometer-alt w-5 mr-3 group-hover:scale-110 transition-transform"></i>Dashboard
+                </a>
+                <a href="leads.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group hover:translate-x-1">
+                    <i class="fas fa-users w-5 mr-3 group-hover:scale-110 transition-transform"></i>Leads
+                </a>
+                <a href="map-finder.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group hover:translate-x-1">
+                    <i class="fas fa-map-pin w-5 mr-3 group-hover:scale-110 transition-transform"></i>Map Finder
+                </a>
+                <a href="kanban.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group hover:translate-x-1">
+                    <i class="fas fa-columns w-5 mr-3 group-hover:scale-110 transition-transform"></i>Kanban
+                </a>
+                <a href="analytics.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group hover:translate-x-1">
+                    <i class="fas fa-chart-line w-5 mr-3 group-hover:scale-110 transition-transform"></i>Analytics
+                </a>
+                <a href="settings.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-gradient-to-r from-primary-50 to-transparent dark:from-primary-900/20 border-l-4 border-primary-500 text-primary-700 dark:text-primary-300 group transition-all duration-200 hover:translate-x-1">
+                    <i class="fas fa-cog w-5 mr-3 group-hover:scale-110 transition-transform"></i>Settings
+                </a>
+            </nav>
+            <div class="p-4 border-t border-gray-200 dark:border-slate-800">
+                <button id="sidebar-toggle-desktop" class="w-full flex items-center justify-center p-2 rounded-xl text-gray-600 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200">
+                    <i class="fas fa-chevron-left"></i><span class="ml-2 text-sm">Collapse</span>
+                </button>
+            </div>
+        </aside>
+
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gradient-to-br from-gray-50/50 to-secondary-50/50 dark:from-gray-900/50 dark:to-secondary-900/50">
+            <div class="max-w-7xl mx-auto">
+                
+                <!-- Page Header -->
+                <div class="mb-5">
+                    <h1 class="text-3xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">Settings</h1>
+                    <p class="text-gray-500 dark:text-gray-400 mt-1.5">Manage your agency preferences and configuration with premium controls.</p>
+                </div>
+
+                <!-- Enhanced Tabs Navigation -->
+                <div class="sticky top-0 z-10 mb-8 bg-white/90 dark:bg-secondary-800/90 backdrop-blur-xl rounded-2xl p-3 border border-white/40 dark:border-secondary-700/60 shadow-card-premium shadow-lg">
+                    <div class="flex flex-wrap md:flex-nowrap gap-2 md:gap-3 -mx-1 px-1 overflow-visible">
+                        <button data-tab="profile" class="tab-button active flex-1 md:flex-none min-w-[140px] md:min-w-0 mx-1 px-5 py-3.5 rounded-xl font-medium text-sm bg-gradient-to-r from-primary-600 to-purple-600 text-white shadow-glow hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center whitespace-nowrap group relative">
+                            <i class="fas fa-user mr-2.5 group-hover:scale-110 transition-transform"></i>Profile
+                            <span class="active-dot absolute -top-1 -right-1 w-2 h-2 bg-emerald-400 rounded-full animate-pulse" style="opacity: 1;"></span>
+                        </button>
+                        <button data-tab="communication" class="tab-button flex-1 md:flex-none min-w-[140px] md:min-w-0 mx-1 px-5 py-3.5 rounded-xl font-medium text-sm bg-secondary-100/80 dark:bg-secondary-800/80 text-secondary-700 dark:text-secondary-300 hover:bg-secondary-200 dark:hover:bg-secondary-700 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center whitespace-nowrap group border border-secondary-200/50 dark:border-secondary-700/50 relative">
+                            <i class="fas fa-comments mr-2.5 group-hover:scale-110 transition-transform"></i>Communication
+                            <span class="active-dot absolute -top-1 -right-1 w-2 h-2 bg-emerald-400 rounded-full animate-pulse" style="opacity: 0;"></span>
+                        </button>
+                        <button data-tab="appearance" class="tab-button flex-1 md:flex-none min-w-[140px] md:min-w-0 mx-1 px-5 py-3.5 rounded-xl font-medium text-sm bg-secondary-100/80 dark:bg-secondary-800/80 text-secondary-700 dark:text-secondary-300 hover:bg-secondary-200 dark:hover:bg-secondary-700 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center whitespace-nowrap group border border-secondary-200/50 dark:border-secondary-700/50 relative">
+                            <i class="fas fa-palette mr-2.5 group-hover:scale-110 transition-transform"></i>Appearance
+                            <span class="active-dot absolute -top-1 -right-1 w-2 h-2 bg-emerald-400 rounded-full animate-pulse" style="opacity: 0;"></span>
+                        </button>
+                        <button data-tab="districts" class="tab-button flex-1 md:flex-none min-w-[140px] md:min-w-0 mx-1 px-5 py-3.5 rounded-xl font-medium text-sm bg-secondary-100/80 dark:bg-secondary-800/80 text-secondary-700 dark:text-secondary-300 hover:bg-secondary-200 dark:hover:bg-secondary-700 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center whitespace-nowrap group border border-secondary-200/50 dark:border-secondary-700/50 relative">
+                            <i class="fas fa-map-marker-alt mr-2.5 group-hover:scale-110 transition-transform"></i>Districts
+                            <span class="active-dot absolute -top-1 -right-1 w-2 h-2 bg-emerald-400 rounded-full animate-pulse" style="opacity: 0;"></span>
+                        </button>
+                    </div>
+                    <!-- Mobile compact pills indicator -->
+                    <div class="mt-3 pt-3 border-t border-secondary-100 dark:border-secondary-700/50 md:hidden">
+                        <div class="mobile-dots-container flex justify-center space-x-2">
+                            <!-- Dots will be dynamically generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Balanced 2-Column Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    
+                    <!-- Left Column -->
+                    <div class="space-y-5">
+                        <!-- Agency Profile Card -->
+                        <div id="profile-section" class="profile-section tab-panel active">
+                            <div class="bg-white/90 dark:bg-secondary-800/90 backdrop-blur-xl rounded-2xl shadow-card-premium p-5 hover:-translate-y-1 transition-transform duration-300 border border-white/20 dark:border-secondary-700/50 h-full">
+                                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center">
+                                    <i class="fas fa-user mr-2 text-primary-500"></i>Agency Profile
+                                </h2>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1.5">Agency Name</label>
+                                        <input type="text" id="agency-name" name="agency_name" value="" placeholder="Enter agency name" class="w-full px-4 py-2.5 bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-transparent outline-none transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1.5">Owner Name</label>
+                                        <input type="text" id="owner-name" name="owner_name" value="" placeholder="Enter owner's full name" class="w-full px-4 py-2.5 bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-transparent outline-none transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1.5">Email</label>
+                                        <input type="email" id="agency-email" name="agency_email" value="" placeholder="agency@example.com" class="w-full px-4 py-2.5 bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-transparent outline-none transition-all">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Communication Card -->
+                        <div id="communication-section" class="communication-section tab-panel">
+                            <div class="bg-white/90 dark:bg-secondary-800/90 backdrop-blur-xl rounded-2xl shadow-card-premium p-5 hover:-translate-y-1 transition-transform duration-300 border border-white/20 dark:border-secondary-700/50 h-full">
+                                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center">
+                                    <i class="fas fa-comments mr-2 text-primary-500"></i>Communication
+                                </h2>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1.5">WhatsApp Number</label>
+                                        <input type="tel" id="whatsapp-number" name="whatsapp_number" value="" placeholder="+1 234 567 8900" class="w-full px-4 py-2.5 bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-transparent outline-none transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1.5">Default Message</label>
+                                        <textarea id="default-message" name="default_message" rows="2" placeholder="Enter your default message for leads..." class="w-full px-4 py-2.5 bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-transparent outline-none transition-all resize-none"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="space-y-5">
+                        <!-- Appearance Card -->
+                        <div id="appearance-section" class="appearance-section tab-panel">
+                            <div class="bg-white/90 dark:bg-secondary-800/90 backdrop-blur-xl rounded-2xl shadow-card-premium p-5 hover:-translate-y-1 transition-transform duration-300 border border-white/20 dark:border-secondary-700/50 h-full">
+                                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center">
+                                    <i class="fas fa-palette mr-2 text-primary-500"></i>Appearance
+                                </h2>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1.5">Theme</label>
+                                        <select id="theme-select" name="theme" class="w-full px-4 py-2.5 bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-transparent outline-none transition-all">
+                                            <option value="light">Light</option>
+                                            <option value="dark">Dark</option>
+                                            <option value="auto">Auto (System)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1.5">Primary Color</label>
+                                        <div class="flex items-center space-x-3">
+                                            <input type="color" id="primary-color" name="primary_color" value="#3b82f6" class="w-10 h-10 cursor-pointer rounded-lg border border-secondary-300 dark:border-secondary-600">
+                                            <input type="text" id="primary-color-text" name="primary_color_text" value="#3b82f6" placeholder="#3b82f6" class="flex-1 px-4 py-2.5 bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-transparent outline-none transition-all">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1.5">Accent Color</label>
+                                        <div class="flex items-center space-x-3">
+                                            <input type="color" id="accent-color" name="accent_color" value="#8b5cf6" class="w-10 h-10 cursor-pointer rounded-lg border border-secondary-300 dark:border-secondary-600">
+                                            <input type="text" id="accent-color-text" name="accent_color_text" value="#8b5cf6" placeholder="#8b5cf6" class="flex-1 px-4 py-2.5 bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-transparent outline-none transition-all">
+                                        </div>
+                                    </div>
+                                    <div class="pt-3">
+                                        <button type="button" class="w-full px-4 py-2.5 bg-gradient-to-r from-primary-600 to-purple-600 text-white font-medium rounded-xl hover:shadow-glow hover:-translate-y-0.5 transition-all duration-300">
+                                            <i class="fas fa-save mr-2"></i>Save Appearance Settings
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Districts Card -->
+                        <div id="districts-section" class="districts-section tab-panel">
+                            <div class="bg-white/90 dark:bg-secondary-800/90 backdrop-blur-xl rounded-2xl shadow-card-premium p-5 hover:-translate-y-1 transition-transform duration-300 border border-white/20 dark:border-secondary-700/50 h-full">
+                                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center">
+                                    <i class="fas fa-map-marker-alt mr-2 text-primary-500"></i>Districts
+                                </h2>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1.5">Available Districts</label>
+                                        <textarea id="districts-list" name="districts_list" rows="3" placeholder="Enter districts, one per line..." class="w-full px-4 py-2.5 bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-transparent outline-none transition-all resize-none"></textarea>
+                                    </div>
+                                    <div class="pt-3">
+                                        <button type="button" class="w-full px-4 py-2.5 bg-gradient-to-r from-primary-600 to-purple-600 text-white font-medium rounded-xl hover:shadow-glow hover:-translate-y-0.5 transition-all duration-300">
+                                            <i class="fas fa-save mr-2"></i>Save District Settings
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save All Button -->
+                <div class="mt-6 flex justify-end">
+                    <button type="button" class="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium rounded-xl hover:shadow-glow hover:-translate-y-0.5 transition-all duration-300">
+                        <i class="fas fa-save mr-2"></i>Save All Changes
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const darkModeIcon = document.getElementById('dark-mode-icon');
+        const html = document.documentElement;
+
+        darkModeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+            darkModeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        });
+
+        // Sidebar Toggle
+        const sidebarToggleMobile = document.getElementById('sidebar-toggle-mobile');
+        const sidebarToggleDesktop = document.getElementById('sidebar-toggle-desktop');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        sidebarToggleMobile.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            sidebarOverlay.classList.toggle('hidden');
+        });
+
+        sidebarToggleDesktop.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.add('hidden');
+            sidebarOverlay.classList.add('hidden');
+        });
+
+        // Color picker sync
+        const primaryColorPicker = document.getElementById('primary-color');
+        const primaryColorText = document.getElementById('primary-color-text');
+        const accentColorPicker = document.getElementById('accent-color');
+        const accentColorText = document.getElementById('accent-color-text');
+
+        if (primaryColorPicker && primaryColorText) {
+            primaryColorPicker.addEventListener('input', (e) => {
+                primaryColorText.value = e.target.value;
+            });
+            primaryColorText.addEventListener('input', (e) => {
+                if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                    primaryColorPicker.value = e.target.value;
+                }
+            });
+        }
+
+        if (accentColorPicker && accentColorText) {
+            accentColorPicker.addEventListener('input', (e) => {
+                accentColorText.value = e.target.value;
+            });
+            accentColorText.addEventListener('input', (e) => {
+                if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                    accentColorPicker.value = e.target.value;
+                }
+            });
+        }
+
+        // Form save handlers
+        document.querySelectorAll('button[type="button"]').forEach(button => {
+            if (button.textContent.includes('Save')) {
+                button.addEventListener('click', () => {
+                    const originalText = button.innerHTML;
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+                    button.disabled = true;
+                    
+                    setTimeout(() => {
+                        button.innerHTML = '<i class="fas fa-check mr-2"></i>Saved!';
+                        setTimeout(() => {
+                            button.innerHTML = originalText;
+                            button.disabled = false;
+                        }, 1500);
+                    }, 800);
+                });
+            }
+        });
+
+        // Enhanced Tab Switching Functionality with Smooth Transitions
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabPanels = document.querySelectorAll('.tab-panel');
+            const mobileDots = document.querySelectorAll('.mobile-dot');
+            
+            // Function to switch tab with smooth transitions
+            function switchTab(tabId) {
+                // First, fade out active panel
+                const currentActivePanel = document.querySelector('.tab-panel.active');
+                if (currentActivePanel) {
+                    currentActivePanel.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+                    currentActivePanel.style.opacity = '0';
+                    currentActivePanel.style.transform = 'translateY(8px)';
+                    
+                    setTimeout(() => {
+                        currentActivePanel.classList.remove('active');
+                        currentActivePanel.style.opacity = '';
+                        currentActivePanel.style.transform = '';
+                        
+                        // Show new panel after a brief delay
+                        const activePanel = document.getElementById(tabId + '-section');
+                        if (activePanel) {
+                            activePanel.classList.add('active');
+                            // Trigger reflow to ensure transition
+                            activePanel.offsetHeight;
+                            activePanel.style.opacity = '1';
+                            activePanel.style.transform = 'translateY(0)';
+                        }
+                    }, 200);
+                } else {
+                    // If no active panel (initial load), just show the new one
+                    const activePanel = document.getElementById(tabId + '-section');
+                    if (activePanel) {
+                        activePanel.classList.add('active');
+                        activePanel.style.opacity = '1';
+                        activePanel.style.transform = 'translateY(0)';
+                    }
+                }
+                
+                // Update button states with smooth transitions
+                tabButtons.forEach(button => {
+                    const isActive = button.getAttribute('data-tab') === tabId;
+                    if (isActive) {
+                        button.classList.add('active');
+                        button.classList.remove('bg-secondary-100/80', 'dark:bg-secondary-800/80', 'text-secondary-700', 'dark:text-secondary-300', 'border');
+                        button.classList.add('bg-gradient-to-r', 'from-primary-600', 'to-purple-600', 'text-white', 'shadow-glow');
+                        // Add active dot indicator
+                        const dot = button.querySelector('.active-dot');
+                        if (dot) dot.style.opacity = '1';
+                    } else {
+                        button.classList.remove('active');
+                        button.classList.remove('bg-gradient-to-r', 'from-primary-600', 'to-purple-600', 'text-white', 'shadow-glow');
+                        button.classList.add('bg-secondary-100/80', 'dark:bg-secondary-800/80', 'text-secondary-700', 'dark:text-secondary-300', 'border', 'border-secondary-200/50', 'dark:border-secondary-700/50');
+                        // Hide active dot indicator
+                        const dot = button.querySelector('.active-dot');
+                        if (dot) dot.style.opacity = '0';
+                    }
+                });
+                
+                // Update mobile indicator dots
+                updateMobileDots(tabId);
+            }
+            
+            // Update mobile indicator dots
+            function updateMobileDots(activeTabId) {
+                const tabs = ['profile', 'communication', 'appearance', 'districts'];
+                const dotContainer = document.querySelector('.mobile-dots-container');
+                if (!dotContainer) return;
+                
+                // Clear existing dots
+                dotContainer.innerHTML = '';
+                
+                // Create new dots
+                tabs.forEach((tab, index) => {
+                    const dot = document.createElement('div');
+                    dot.className = `w-2 h-2 rounded-full transition-all duration-300 ${tab === activeTabId ? 'bg-primary-500 scale-125' : 'bg-secondary-300 dark:bg-secondary-600'}`;
+                    dotContainer.appendChild(dot);
+                });
+            }
+            
+            // Add click event to each tab button with ripple effect
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Create ripple effect
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.7);
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        width: ${size}px;
+                        height: ${size}px;
+                        top: ${y}px;
+                        left: ${x}px;
+                        pointer-events: none;
+                    `;
+                    
+                    this.appendChild(ripple);
+                    
+                    // Remove ripple after animation
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                    
+                    // Switch tab
+                    switchTab(tabId);
+                });
+            });
+            
+            // Add CSS for ripple animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+                .mobile-dots-container {
+                    display: flex;
+                    justify-content: center;
+                    gap: 0.5rem;
+                    padding: 0.5rem 0;
+                }
+                .active-dot {
+                    transition: opacity 0.3s ease;
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Initialize with Profile tab active (default)
+            setTimeout(() => switchTab('profile'), 100);
+            
+            // Auto-update mobile dots on resize
+            window.addEventListener('resize', () => {
+                const activeTab = document.querySelector('.tab-button.active');
+                if (activeTab) {
+                    const tabId = activeTab.getAttribute('data-tab');
+                    updateMobileDots(tabId);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

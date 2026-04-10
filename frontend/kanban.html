@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban | MapLeads CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+                            400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+                            800: '#1e40af', 900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glassmorphism { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
+        .dark .glassmorphism { background: rgba(30, 41, 59, 0.7); }
+        
+        /* Premium Kanban Styles */
+        .kanban-board-container {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 1.5rem;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05), 0 8px 32px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .kanban-board-container {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2), 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .column-header-new {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+        .column-header-contacted {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        .column-header-replied {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        .column-header-demo_sent {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+        .column-header-closed {
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        }
+        
+        .count-badge {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .dark .count-badge {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.7) 100%);
+        }
+        
+        .lead-card-gradient-border {
+            border-left: 4px solid;
+            border-image: linear-gradient(to bottom, #3b82f6, #8b5cf6) 1;
+        }
+        .lead-card-gradient-border-contacted {
+            border-image: linear-gradient(to bottom, #f59e0b, #f97316) 1;
+        }
+        .lead-card-gradient-border-replied {
+            border-image: linear-gradient(to bottom, #10b981, #14b8a6) 1;
+        }
+        .lead-card-gradient-border-demo_sent {
+            border-image: linear-gradient(to bottom, #8b5cf6, #ec4899) 1;
+        }
+        .lead-card-gradient-border-closed {
+            border-image: linear-gradient(to bottom, #14b8a6, #0d9488) 1;
+        }
+        
+        .drop-zone-active {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .shadow-glow {
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3), 0 8px 10px -6px rgba(59, 130, 246, 0.2);
+        }
+        .dark .shadow-glow {
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5), 0 8px 10px -6px rgba(59, 130, 246, 0.3);
+        }
+        
+        .gradient-icon {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Custom CSS Animations */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-border {
+            position: relative;
+            background: linear-gradient(white, white) padding-box,
+                        linear-gradient(135deg, #667eea, #764ba2) border-box;
+            border: 2px solid transparent;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .glow {
+            box-shadow: 0 0 20px rgba(99,102,241,0.5);
+        }
+
+        .transition-all-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Improved Kanban Board Layout */
+        .kanban-board-wrapper {
+            position: relative;
+            min-width: 1400px;
+            padding-bottom: 1rem;
+        }
+        .kanban-columns-container {
+            display: flex;
+            gap: 1.5rem;
+            padding: 0.5rem 0.5rem 1.5rem;
+            min-width: min-content;
+        }
+        .kanban-column {
+            width: 280px;
+            flex-shrink: 0;
+        }
+        .kanban-scroll-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        .kanban-scroll-container::-webkit-scrollbar {
+            height: 10px;
+        }
+        .kanban-scroll-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+        .kanban-scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.5);
+            border-radius: 10px;
+        }
+        .kanban-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.7);
+        }
+        .dark .kanban-scroll-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .dark .kanban-scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.7);
+        }
+        .scroll-shadow {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.05), transparent);
+            pointer-events: none;
+            z-index: 10;
+            border-radius: 0 0 1.5rem 1.5rem;
+        }
+        .dark .scroll-shadow {
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
+        }
+        .scroll-indicator {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            opacity: 0.7;
+            border-radius: 2px;
+            z-index: 11;
+        }
+    </style>
+    <script>
+        // Initialize dark mode BEFORE page renders
+        (function() {
+            const html = document.documentElement;
+            const savedTheme = localStorage.getItem('darkMode');
+            
+            if (savedTheme === 'true' || (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+            }
+        })();
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
+    
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md border-b border-white/20 dark:border-secondary-700/50 shadow-soft">
+        <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center space-x-4">
+                <button id="sidebar-toggle-mobile" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="flex items-center">
+                    <div class="h-8 w-8 rounded-lg bg-primary-600 flex items-center justify-center">
+                        <i class="fas fa-map-marker-alt text-white"></i>
+                    </div>
+                    <span class="ml-3 text-xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">MapLeads</span>
+                    <span class="ml-1 text-sm font-medium text-primary-600 dark:text-primary-400">CRM</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="dark-mode-toggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <i id="dark-mode-icon" class="fas fa-moon"></i>
+                </button>
+                <div class="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center ring-2 ring-primary-500/50 hover:ring-primary-500 transition-all duration-300">
+                    <i class="fas fa-user text-primary-600 dark:text-primary-400"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex h-[calc(100vh-4rem)]">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="hidden lg:flex flex-col bg-white/80 dark:bg-slate-900 backdrop-blur-md border-r border-gray-200/50 dark:border-slate-800 w-64 transition-all duration-300 shadow-sidebar">
+            <nav class="flex-1 px-4 py-6 space-y-1">
+                <a href="dashboard.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-tachometer-alt w-5 mr-3 group-hover:scale-110 transition-transform"></i>Dashboard
+                </a>
+                <a href="leads.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-users w-5 mr-3 group-hover:scale-110 transition-transform"></i>Leads
+                </a>
+                <a href="map-finder.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-map-pin w-5 mr-3 group-hover:scale-110 transition-transform"></i>Map Finder
+                </a>
+                <a href="kanban.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-gradient-to-r from-primary-50 to-transparent dark:from-primary-900/20 border-l-4 border-primary-500 text-primary-700 dark:text-primary-300">
+                    <i class="fas fa-columns w-5 mr-3"></i>Kanban
+                </a>
+                <a href="analytics.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-chart-line w-5 mr-3 group-hover:scale-110 transition-transform"></i>Analytics
+                </a>
+                <a href="settings.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-cog w-5 mr-3 group-hover:scale-110 transition-transform"></i>Settings
+                </a>
+            </nav>
+            <div class="p-4 border-t border-gray-200 dark:border-slate-800">
+                <button id="sidebar-toggle-desktop" class="w-full flex items-center justify-center p-2 rounded-lg text-gray-600 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200">
+                    <i class="fas fa-chevron-left"></i><span class="ml-2 text-sm">Collapse</span>
+                </button>
+            </div>
+        </aside>
+
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-4 md:p-6 kanban-board-container">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-8">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">Sales Pipeline</h1>
+                        <p class="text-gray-600 dark:text-gray-400 mt-2">Drag and drop leads between stages</p>
+                    </div>
+                    <button id="refresh-btn" class="mt-4 md:mt-0 px-5 py-2.5 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-medium rounded-xl flex items-center shadow-lg hover:shadow-xl transition-all duration-300">
+                        <i class="fas fa-sync-alt mr-2"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="kanban-board-wrapper">
+                    <div class="kanban-scroll-container">
+                        <div class="kanban-columns-container">
+                            <!-- New Column -->
+                            <div class="kanban-column">
+                                <div class="bg-white/90 dark:bg-secondary-800/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 dark:border-secondary-700/50 overflow-hidden">
+                                    <div class="p-5 column-header-new rounded-t-3xl">
+                                        <h3 class="font-bold text-white flex items-center justify-between">
+                                            <span class="flex items-center"><i class="fas fa-inbox mr-3"></i> New</span>
+                                            <span id="new-count" class="count-badge px-3 py-1 text-xs font-bold rounded-full text-primary-700 dark:text-primary-300">0</span>
+                                        </h3>
+                                    </div>
+                                    <div id="new-column" class="p-4 min-h-[450px] bg-gradient-to-b from-white/50 to-transparent dark:from-secondary-900/30 dark:to-transparent border-2 border-dashed border-primary-300/50 dark:border-primary-700/30 rounded-b-3xl transition-all duration-300" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                        <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                                            <i class="fas fa-inbox text-4xl mb-3 gradient-icon animate-float"></i>
+                                            <p class="text-sm font-medium">Drop leads here</p>
+                                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">No leads yet</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contacted Column -->
+                            <div class="kanban-column">
+                                <div class="bg-white/90 dark:bg-secondary-800/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 dark:border-secondary-700/50 overflow-hidden">
+                                    <div class="p-5 column-header-contacted rounded-t-3xl">
+                                        <h3 class="font-bold text-white flex items-center justify-between">
+                                            <span class="flex items-center"><i class="fas fa-phone mr-3"></i> Contacted</span>
+                                            <span id="contacted-count" class="count-badge px-3 py-1 text-xs font-bold rounded-full text-yellow-700 dark:text-yellow-300">0</span>
+                                        </h3>
+                                    </div>
+                                    <div id="contacted-column" class="p-4 min-h-[450px] bg-gradient-to-b from-white/50 to-transparent dark:from-secondary-900/30 dark:to-transparent border-2 border-dashed border-yellow-300/50 dark:border-yellow-700/30 rounded-b-3xl transition-all duration-300" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                        <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                                            <i class="fas fa-phone text-4xl mb-3 gradient-icon animate-float"></i>
+                                            <p class="text-sm font-medium">Drop leads here</p>
+                                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">No leads yet</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Replied Column -->
+                            <div class="kanban-column">
+                                <div class="bg-white/90 dark:bg-secondary-800/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 dark:border-secondary-700/50 overflow-hidden">
+                                    <div class="p-5 column-header-replied rounded-t-3xl">
+                                        <h3 class="font-bold text-white flex items-center justify-between">
+                                            <span class="flex items-center"><i class="fas fa-reply mr-3"></i> Replied</span>
+                                            <span id="replied-count" class="count-badge px-3 py-1 text-xs font-bold rounded-full text-green-700 dark:text-green-300">0</span>
+                                        </h3>
+                                    </div>
+                                    <div id="replied-column" class="p-4 min-h-[450px] bg-gradient-to-b from-white/50 to-transparent dark:from-secondary-900/30 dark:to-transparent border-2 border-dashed border-green-300/50 dark:border-green-700/30 rounded-b-3xl transition-all duration-300" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                        <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                                            <i class="fas fa-reply text-4xl mb-3 gradient-icon animate-float"></i>
+                                            <p class="text-sm font-medium">Drop leads here</p>
+                                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">No leads yet</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Demo Sent Column -->
+                            <div class="kanban-column">
+                                <div class="bg-white/90 dark:bg-secondary-800/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 dark:border-secondary-700/50 overflow-hidden">
+                                    <div class="p-5 column-header-demo_sent rounded-t-3xl">
+                                        <h3 class="font-bold text-white flex items-center justify-between">
+                                            <span class="flex items-center"><i class="fas fa-paper-plane mr-3"></i> Demo Sent</span>
+                                            <span id="demo_sent-count" class="count-badge px-3 py-1 text-xs font-bold rounded-full text-purple-700 dark:text-purple-300">0</span>
+                                        </h3>
+                                    </div>
+                                    <div id="demo_sent-column" class="p-4 min-h-[450px] bg-gradient-to-b from-white/50 to-transparent dark:from-secondary-900/30 dark:to-transparent border-2 border-dashed border-purple-300/50 dark:border-purple-700/30 rounded-b-3xl transition-all duration-300" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                        <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                                            <i class="fas fa-paper-plane text-4xl mb-3 gradient-icon animate-float"></i>
+                                            <p class="text-sm font-medium">Drop leads here</p>
+                                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">No leads yet</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Closed Column -->
+                            <div class="kanban-column">
+                                <div class="bg-white/90 dark:bg-secondary-800/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 dark:border-secondary-700/50 overflow-hidden">
+                                    <div class="p-5 column-header-closed rounded-t-3xl">
+                                        <h3 class="font-bold text-white flex items-center justify-between">
+                                            <span class="flex items-center"><i class="fas fa-check-circle mr-3"></i> Closed</span>
+                                            <span id="closed-count" class="count-badge px-3 py-1 text-xs font-bold rounded-full text-teal-700 dark:text-teal-300">0</span>
+                                        </h3>
+                                    </div>
+                                    <div id="closed-column" class="p-4 min-h-[450px] bg-gradient-to-b from-white/50 to-transparent dark:from-secondary-900/30 dark:to-transparent border-2 border-dashed border-teal-300/50 dark:border-teal-700/30 rounded-b-3xl transition-all duration-300" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                        <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                                            <i class="fas fa-check-circle text-4xl mb-3 gradient-icon animate-float"></i>
+                                            <p class="text-sm font-medium">Drop leads here</p>
+                                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">No leads yet</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Scroll shadow elements -->
+                    <div class="scroll-shadow-left"></div>
+                    <div class="scroll-shadow-right"></div>
+                </div>
+            </div>
+        </main>
+
+        <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+    </div>
+
+    <script src="./assets/js/api.js"></script>
+    <script>
+        // Initialize dark mode icon
+        (function() {
+            const html = document.documentElement;
+            const darkIcon = document.getElementById('dark-mode-icon');
+            
+            if (html.classList.contains('dark')) {
+                darkIcon.className = 'fas fa-sun';
+            }
+        })();
+
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const darkModeIcon = document.getElementById('dark-mode-icon');
+        const html = document.documentElement;
+        
+        darkModeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark ? 'true' : 'false');
+            darkModeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        });
+
+        // Sidebar toggles
+        const sidebarMobileToggle = document.getElementById('sidebar-toggle-mobile');
+        const sidebarDesktopToggle = document.getElementById('sidebar-toggle-desktop');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const sidebar = document.getElementById('sidebar');
+        
+        sidebarMobileToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            sidebarOverlay.classList.toggle('hidden');
+        });
+        
+        sidebarDesktopToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+        });
+        
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.add('hidden');
+            sidebarOverlay.classList.add('hidden');
+        });
+
+        // Kanban functionality
+        const stages = ['new', 'contacted', 'replied', 'demo_sent', 'closed'];
+        const stageNames = {new: 'New', contacted: 'Contacted', replied: 'Replied', demo_sent: 'Demo Sent', closed: 'Closed'};
+        let leads = [];
+        let draggedCard = null;
+
+        const refreshBtn = document.getElementById('refresh-btn');
+        refreshBtn.addEventListener('click', fetchLeads);
+
+        async function fetchLeads() {
+            try {
+                const response = await api.getLeads();
+                leads = response.data || response;
+                renderKanban();
+                showToast('Leads refreshed successfully', 'success');
+            } catch (error) {
+                console.error('Failed to fetch leads:', error);
+                showToast('Failed to load leads', 'error');
+            }
+        }
+
+        function renderKanban() {
+            stages.forEach(stage => {
+                const column = document.getElementById(`${stage}-column`);
+                if (column) {
+                    const emptyState = column.querySelector('.text-center');
+                    if (emptyState) emptyState.remove();
+                    column.innerHTML = '';
+                }
+            });
+
+            leads.forEach(lead => {
+                const stage = lead.stage || 'new';
+                const column = document.getElementById(`${stage}-column`);
+                if (!column) return;
+                column.appendChild(createLeadCard(lead));
+            });
+
+            updateColumnCounts();
+
+            stages.forEach(stage => {
+                const column = document.getElementById(`${stage}-column`);
+                if (column && column.children.length === 0) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.className = 'text-center py-8 text-gray-500 dark:text-gray-400';
+                    emptyDiv.innerHTML = '<i class="fas fa-inbox text-3xl mb-2"></i><p class="text-sm">No leads</p>';
+                    column.appendChild(emptyDiv);
+                }
+            });
+        }
+
+        function createLeadCard(lead) {
+            const card = document.createElement('div');
+            const stage = lead.stage || 'new';
+            const gradientClass = `lead-card-gradient-border${stage !== 'new' ? '-' + stage : ''}`;
+            
+            card.className = `lead-card bg-white/90 dark:bg-secondary-800/90 backdrop-blur-xl rounded-xl shadow-lg p-4 mb-4 border-l-4 ${gradientClass} border-gray-200/50 dark:border-gray-700/50 cursor-move hover:-translate-y-2 hover:shadow-glow transition-all duration-300`;
+            card.draggable = true;
+            card.dataset.id = lead._id || lead.id;
+            card.dataset.stage = stage;
+            card.addEventListener('dragstart', dragStart);
+            card.addEventListener('dragend', dragEnd);
+            card.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <div class="flex items-start justify-between">
+                            <h4 class="font-bold text-gray-900 dark:text-white truncate text-sm">${lead.businessName || lead.business || 'Unnamed'}</h4>
+                            <span class="text-xs font-medium px-2 py-1 rounded-full bg-gradient-to-r from-primary-500/20 to-primary-600/20 text-primary-700 dark:text-primary-300">${stageNames[stage]}</span>
+                        </div>
+                        <div class="mt-3 space-y-2">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 flex items-center"><i class="fas fa-user mr-2 text-primary-500"></i>${lead.ownerName || lead.owner || 'N/A'}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 flex items-center"><i class="fas fa-map-marker-alt mr-2 text-primary-500"></i>${lead.district || 'N/A'}</p>
+                        </div>
+                        <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+                            <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow">₹${lead.budget || 0}</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center"><i class="fas fa-calendar mr-1.5"></i>${formatDate(lead.followUpDate) || 'No date'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        function formatDate(date) {
+            if (!date) return '';
+            const d = new Date(date);
+            return d.toLocaleDateString('en-IN', {day: 'numeric', month: 'short'});
+        }
+
+        function updateColumnCounts() {
+            stages.forEach(stage => {
+                const column = document.getElementById(`${stage}-column`);
+                const count = column ? column.querySelectorAll('.lead-card').length : 0;
+                const badge = document.getElementById(`${stage}-count`);
+                if (badge) badge.textContent = count;
+            });
+        }
+
+        function dragStart(e) {
+            draggedCard = this;
+            e.dataTransfer.setData('text/plain', this.dataset.id);
+            this.classList.add('opacity-50', 'scale-95');
+            
+            // Add drop-zone-active class to all columns
+            stages.forEach(stage => {
+                const column = document.getElementById(`${stage}-column`);
+                if (column) {
+                    column.classList.add('drop-zone-active');
+                }
+            });
+        }
+
+        function dragEnd(e) {
+            // Remove visual effects from dragged card
+            if (draggedCard) {
+                draggedCard.classList.remove('opacity-50', 'scale-95');
+            }
+            
+            // Remove drop-zone-active class from all columns
+            stages.forEach(stage => {
+                const column = document.getElementById(`${stage}-column`);
+                if (column) {
+                    column.classList.remove('drop-zone-active');
+                }
+            });
+            
+            draggedCard = null;
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+            const column = e.target.closest('[id$="-column"]');
+            if (column) {
+                column.classList.add('drop-zone-active');
+            }
+        }
+
+        function handleDragLeave(e) {
+            const column = e.target.closest('[id$="-column"]');
+            if (column && !column.contains(e.relatedTarget)) {
+                column.classList.remove('drop-zone-active');
+            }
+        }
+
+        async function drop(e) {
+            e.preventDefault();
+            if (!draggedCard) return;
+
+            const column = e.target.closest('[id$="-column"]');
+            if (!column) return;
+
+            // Remove drop-zone-active from all columns
+            stages.forEach(stage => {
+                const col = document.getElementById(`${stage}-column`);
+                if (col) col.classList.remove('drop-zone-active');
+            });
+
+            const newStage = column.id.replace('-column', '');
+            const leadId = draggedCard.dataset.id;
+            const oldStage = draggedCard.dataset.stage;
+
+            if (newStage === oldStage) {
+                draggedCard.classList.remove('opacity-50', 'scale-95');
+                draggedCard = null;
+                return;
+            }
+
+            try {
+                await api.updateLead(leadId, {stage: newStage});
+                
+                // Add animation effect
+                draggedCard.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    column.appendChild(draggedCard);
+                    draggedCard.dataset.stage = newStage;
+                    draggedCard.classList.remove('opacity-50', 'scale-95');
+                    draggedCard.style.transform = '';
+                    
+                    // Update gradient border class
+                    const gradientClass = `lead-card-gradient-border${newStage !== 'new' ? '-' + newStage : ''}`;
+                    draggedCard.className = draggedCard.className.replace(/lead-card-gradient-border[-\w]*/, gradientClass);
+                    
+                    updateColumnCounts();
+                    showToast(`Lead moved to ${stageNames[newStage]}`, 'success');
+
+                    const lead = leads.find(l => (l._id || l.id) === leadId);
+                    if (lead) lead.stage = newStage;
+                }, 150);
+            } catch (error) {
+                console.error('Failed to update lead:', error);
+                showToast('Failed to update lead stage', 'error');
+                draggedCard.classList.remove('opacity-50', 'scale-95');
+            }
+
+            draggedCard = null;
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const colors = {
+                info: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg',
+                success: 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg',
+                error: 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg'
+            };
+            const icons = {
+                info: 'fa-info-circle',
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle'
+            };
+            const toast = document.createElement('div');
+            toast.className = `${colors[type]} px-5 py-4 rounded-xl backdrop-blur-sm border border-white/20 flex items-center justify-between animate-slide-up`;
+            toast.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas ${icons[type]} mr-3 text-lg"></i>
+                    <span class="font-medium">${message}</span>
+                </div>
+                <button class="ml-4 opacity-70 hover:opacity-100 transition-opacity" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('animate-fade-out');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        // Add dragleave event listeners to columns
+        function setupDragDropListeners() {
+            stages.forEach(stage => {
+                const column = document.getElementById(`${stage}-column`);
+                if (column) {
+                    column.addEventListener('dragleave', handleDragLeave);
+                }
+            });
+        }
+
+        // Initialize
+        fetchLeads();
+        setupDragDropListeners();
+    </script>
+</body>
+</html>

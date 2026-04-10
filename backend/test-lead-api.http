@@ -1,0 +1,90 @@
+# Lead API Test Requests
+# Use with REST Client extension in VSCode or with curl
+
+@baseUrl = http://localhost:5000
+@apiVersion = v1
+
+### Get API Root
+GET {{baseUrl}}/api/{{apiVersion}}
+
+### Get All Leads (with pagination)
+GET {{baseUrl}}/api/{{apiVersion}}/leads
+Content-Type: application/json
+
+### Get All Leads with Filters
+GET {{baseUrl}}/api/{{apiVersion}}/leads?status=new&district=Mumbai&page=1&limit=5
+Content-Type: application/json
+
+### Get Lead Statistics
+GET {{baseUrl}}/api/{{apiVersion}}/leads/stats/summary
+Content-Type: application/json
+
+### Create a New Lead
+POST {{baseUrl}}/api/{{apiVersion}}/leads
+Content-Type: application/json
+
+{
+  "businessName": "Tech Solutions Inc",
+  "ownerName": "John Doe",
+  "district": "Mumbai",
+  "whatsapp": "+919876543210",
+  "email": "john@techsolutions.com",
+  "firstMessage": "Interested in your CRM software",
+  "followUp": "Schedule demo next week",
+  "status": "new",
+  "remark": "High potential lead"
+}
+
+### Create Another Lead
+POST {{baseUrl}}/api/{{apiVersion}}/leads
+Content-Type: application/json
+
+{
+  "businessName": "Retail Store",
+  "ownerName": "Jane Smith",
+  "district": "Delhi",
+  "whatsapp": "+919876543211",
+  "email": "jane@retailstore.com",
+  "firstMessage": "Looking for inventory management",
+  "status": "contacted",
+  "remark": "Medium priority"
+}
+
+### Get Single Lead (replace :id with actual lead ID)
+# First, get a lead ID from the GET all leads response
+GET {{baseUrl}}/api/{{apiVersion}}/leads/{{leadId}}
+Content-Type: application/json
+
+### Update a Lead
+PUT {{baseUrl}}/api/{{apiVersion}}/leads/{{leadId}}
+Content-Type: application/json
+
+{
+  "status": "qualified",
+  "followUp": "Demo completed, sending proposal",
+  "remark": "Very interested, follow up in 2 days"
+}
+
+### Partially Update a Lead
+PATCH {{baseUrl}}/api/{{apiVersion}}/leads/{{leadId}}
+Content-Type: application/json
+
+{
+  "status": "proposal"
+}
+
+### Delete a Lead
+DELETE {{baseUrl}}/api/{{apiVersion}}/leads/{{leadId}}
+Content-Type: application/json
+
+### Test Validation Errors
+POST {{baseUrl}}/api/{{apiVersion}}/leads
+Content-Type: application/json
+
+{
+  "businessName": "",
+  "ownerName": "Test",
+  "district": "Test",
+  "whatsapp": "invalid",
+  "email": "invalid-email"
+}

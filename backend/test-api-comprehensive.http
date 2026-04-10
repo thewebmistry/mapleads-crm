@@ -1,0 +1,248 @@
+# Comprehensive API Tests for MapLeads CRM
+# Use with REST Client extension in VSCode or with curl
+
+@baseUrl = http://localhost:5000
+@apiVersion = v1
+
+# ======================
+# 1. HEALTH ENDPOINTS
+# ======================
+
+### Get API Root
+GET {{baseUrl}}/api/{{apiVersion}}
+
+### Get Health Status
+GET {{baseUrl}}/api/{{apiVersion}}/health
+
+### Get Detailed Health
+GET {{baseUrl}}/api/health/detailed
+
+# ======================
+# 2. AUTHENTICATION ENDPOINTS
+# ======================
+
+### Register a new user (Admin)
+# @name registerAdmin
+POST {{baseUrl}}/api/{{apiVersion}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Admin User",
+  "email": "admin@mapleads.com",
+  "password": "Admin@123",
+  "role": "admin"
+}
+
+### Register a new user (Agent)
+# @name registerAgent
+POST {{baseUrl}}/api/{{apiVersion}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Agent User",
+  "email": "agent@mapleads.com",
+  "password": "Agent@123",
+  "role": "agent"
+}
+
+### Login as Admin
+# @name loginAdmin
+POST {{baseUrl}}/api/{{apiVersion}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@mapleads.com",
+  "password": "Admin@123"
+}
+
+### Login as Agent
+# @name loginAgent
+POST {{baseUrl}}/api/{{apiVersion}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "agent@mapleads.com",
+  "password": "Agent@123"
+}
+
+### Get current user profile (requires token)
+GET {{baseUrl}}/api/{{apiVersion}}/auth/me
+Authorization: Bearer {{adminToken}}
+
+### Logout (client-side)
+POST {{baseUrl}}/api/{{apiVersion}}/auth/logout
+Authorization: Bearer {{adminToken}}
+
+# ======================
+# 3. LEAD ENDPOINTS
+# ======================
+
+### Create a new lead (requires authentication)
+# @name createLead1
+POST {{baseUrl}}/api/{{apiVersion}}/leads
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "businessName": "Tech Solutions Inc",
+  "ownerName": "John Doe",
+  "district": "Mumbai",
+  "businessType": "technology",
+  "mapsLink": "https://maps.google.com/?q=Tech+Solutions",
+  "whatsapp": "+919876543210",
+  "email": "john@techsolutions.com",
+  "instagram": "@techsolutions",
+  "firstMessageDate": "2024-01-15",
+  "followUpDate": "2024-01-22",
+  "stage": "prospect",
+  "status": "new",
+  "budget": 50000,
+  "remark": "High potential lead interested in CRM",
+  "probability": 70
+}
+
+### Create another lead
+# @name createLead2
+POST {{baseUrl}}/api/{{apiVersion}}/leads
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "businessName": "Retail Store",
+  "ownerName": "Jane Smith",
+  "district": "Delhi",
+  "businessType": "retail",
+  "mapsLink": "https://maps.google.com/?q=Retail+Store",
+  "whatsapp": "+919876543211",
+  "email": "jane@retailstore.com",
+  "instagram": "@retailstore",
+  "firstMessageDate": "2024-01-10",
+  "followUpDate": "2024-01-17",
+  "stage": "qualified",
+  "status": "contacted",
+  "budget": 30000,
+  "remark": "Medium priority, needs follow-up",
+  "probability": 50
+}
+
+### Get all leads with pagination
+GET {{baseUrl}}/api/{{apiVersion}}/leads?page=1&limit=10
+Authorization: Bearer {{adminToken}}
+
+### Get leads with filters
+GET {{baseUrl}}/api/{{apiVersion}}/leads?district=Mumbai&stage=prospect&status=new&page=1&limit=5
+Authorization: Bearer {{adminToken}}
+
+### Get lead statistics
+GET {{baseUrl}}/api/{{apiVersion}}/leads/stats/summary
+Authorization: Bearer {{adminToken}}
+
+### Get leads with follow-ups
+GET {{baseUrl}}/api/{{apiVersion}}/leads/follow-ups
+Authorization: Bearer {{adminToken}}
+
+### Get single lead (replace :id with actual lead ID)
+GET {{baseUrl}}/api/{{apiVersion}}/leads/{{leadId}}
+Authorization: Bearer {{adminToken}}
+
+### Update a lead
+PUT {{baseUrl}}/api/{{apiVersion}}/leads/{{leadId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "stage": "qualified",
+  "status": "proposal",
+  "budget": 55000,
+  "probability": 80,
+  "remark": "Demo completed, sending proposal"
+}
+
+### Archive a lead (soft delete)
+DELETE {{baseUrl}}/api/{{apiVersion}}/leads/{{leadId}}
+Authorization: Bearer {{adminToken}}
+
+### Bulk update leads
+POST {{baseUrl}}/api/{{apiVersion}}/leads/bulk-update
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "leadIds": ["{{leadId1}}", "{{leadId2}}"],
+  "updates": {
+    "stage": "negotiation",
+    "status": "proposal"
+  }
+}
+
+# ======================
+# 4. REMINDER ENDPOINTS
+# ======================
+
+### Create a reminder
+# @name createReminder
+POST {{baseUrl}}/api/{{apiVersion}}/reminders
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "leadId": "{{leadId}}",
+  "dueDate": "2024-01-25T10:00:00.000Z",
+  "message": "Follow up with proposal",
+  "priority": "high"
+}
+
+### Get all reminders
+GET {{baseUrl}}/api/{{apiVersion}}/reminders
+Authorization: Bearer {{adminToken}}
+
+### Get reminders by lead
+GET {{baseUrl}}/api/{{apiVersion}}/reminders/lead/{{leadId}}
+Authorization: Bearer {{adminToken}}
+
+### Get upcoming reminders
+GET {{baseUrl}}/api/{{apiVersion}}/reminders/upcoming
+Authorization: Bearer {{adminToken}}
+
+### Get single reminder
+GET {{baseUrl}}/api/{{apiVersion}}/reminders/{{reminderId}}
+Authorization: Bearer {{adminToken}}
+
+### Update reminder
+PUT {{baseUrl}}/api/{{apiVersion}}/reminders/{{reminderId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "message": "Updated reminder message",
+  "priority": "medium",
+  "completed": true
+}
+
+### Delete reminder
+DELETE {{baseUrl}}/api/{{apiVersion}}/reminders/{{reminderId}}
+Authorization: Bearer {{adminToken}}
+
+# ======================
+# 5. ERROR TESTING
+# ======================
+
+### Test validation error - missing required fields
+POST {{baseUrl}}/api/{{apiVersion}}/leads
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "businessName": "",
+  "ownerName": "Test"
+}
+
+### Test invalid authentication
+GET {{baseUrl}}/api/{{apiVersion}}/leads
+Authorization: Bearer invalidtoken
+
+### Test unauthorized access (agent trying to access admin-only routes)
+# This would require implementing admin-only routes first
+
+### Test 404 route
+GET {{baseUrl}}/api/{{apiVersion}}/nonexistent

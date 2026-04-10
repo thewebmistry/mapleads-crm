@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leads | MapLeads CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+                            400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+                            800: '#1e40af', 900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .dark .glassmorphism {
+            background: rgba(30, 41, 59, 0.7);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .stage-new { background: linear-gradient(90deg, #9ca3af, #d1d5db); }
+        .stage-contacted { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .stage-replied { background: linear-gradient(90deg, #10b981, #34d399); }
+        .stage-demo_sent { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        .stage-closed { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .status-hot { background: linear-gradient(90deg, #ef4444, #f87171); }
+        .status-warm { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .status-cold { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .district-ranchi { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .district-gumla { background: linear-gradient(90deg, #10b981, #34d399); }
+        .district-lohardaga { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        .district-khunti { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .district-simdega { background: linear-gradient(90deg, #ec4899, #f472b6); }
+
+        /* Premium UI enhancements */
+        .shadow-soft {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        }
+        .dark .shadow-soft {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+        }
+        .shadow-card-premium {
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        .dark .shadow-card-premium {
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .focus-gradient-ring:focus {
+            outline: none;
+            border-color: transparent;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5), 0 0 0 6px rgba(139, 92, 246, 0.3);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .gradient-badge-hot {
+            background: linear-gradient(135deg, #f43f5e, #ec4899);
+            color: white;
+        }
+        .gradient-badge-warm {
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+            color: white;
+        }
+        .gradient-badge-cold {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+        }
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            transition: transform 0.2s ease;
+        }
+        .glass-container {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .dark .glass-container {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Custom CSS Animations */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-border {
+            position: relative;
+            background: linear-gradient(white, white) padding-box,
+                        linear-gradient(135deg, #667eea, #764ba2) border-box;
+            border: 2px solid transparent;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .glow {
+            box-shadow: 0 0 20px rgba(99,102,241,0.5);
+        }
+
+        .transition-all-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <script>
+        // Initialize dark mode BEFORE page renders
+        (function() {
+            const html = document.documentElement;
+            const savedTheme = localStorage.getItem('darkMode');
+            
+            if (savedTheme === 'true' || (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+            }
+        })();
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
+    
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md border-b border-white/20 dark:border-secondary-700/50 shadow-soft">
+        <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center space-x-4">
+                <button id="sidebar-toggle-mobile" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="flex items-center">
+                    <div class="h-8 w-8 rounded-lg bg-primary-600 flex items-center justify-center">
+                        <i class="fas fa-map-marker-alt text-white"></i>
+                    </div>
+                    <span class="ml-3 text-xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">MapLeads</span>
+                    <span class="ml-1 text-sm font-medium text-primary-600 dark:text-primary-400">CRM</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="dark-mode-toggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <i id="dark-mode-icon" class="fas fa-moon"></i>
+                </button>
+                <div class="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center ring-2 ring-primary-500/50 hover:ring-primary-500 transition-all duration-300">
+                    <i class="fas fa-user text-primary-600 dark:text-primary-400"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex h-[calc(100vh-4rem)]">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="hidden lg:flex flex-col bg-white/80 dark:bg-slate-900 backdrop-blur-md border-r border-gray-200/50 dark:border-slate-800 w-64 transition-all duration-300 shadow-sidebar">
+            <nav class="flex-1 px-4 py-6 space-y-1">
+                <a href="dashboard.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-tachometer-alt w-5 mr-3 group-hover:scale-110 transition-transform"></i>Dashboard
+                </a>
+                <a href="leads.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-gradient-to-r from-primary-50 to-transparent dark:from-primary-900/20 border-l-4 border-primary-500 text-primary-700 dark:text-primary-300">
+                    <i class="fas fa-users w-5 mr-3"></i>Leads
+                </a>
+                <a href="map-finder.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-map-pin w-5 mr-3 group-hover:scale-110 transition-transform"></i>Map Finder
+                </a>
+                <a href="kanban.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-columns w-5 mr-3 group-hover:scale-110 transition-transform"></i>Kanban
+                </a>
+                <a href="analytics.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-chart-line w-5 mr-3 group-hover:scale-110 transition-transform"></i>Analytics
+                </a>
+                <a href="settings.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-cog w-5 mr-3 group-hover:scale-110 transition-transform"></i>Settings
+                </a>
+            </nav>
+            <div class="p-4 border-t border-gray-200 dark:border-slate-800">
+                <button id="sidebar-toggle-desktop" class="w-full flex items-center justify-center p-2 rounded-lg text-gray-600 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200">
+                    <i class="fas fa-chevron-left"></i><span class="ml-2 text-sm">Collapse</span>
+                </button>
+            </div>
+        </aside>
+
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 dark:bg-gray-900">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold">Leads Management</h1>
+                        <p class="text-gray-600 dark:text-gray-400 mt-1">Manage and track all your business leads</p>
+                    </div>
+                    <button id="add-lead-btn" class="mt-4 md:mt-0 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-lg flex items-center shadow-lg shadow-blue-500/30">
+                        <i class="fas fa-plus mr-2"></i> Add Lead
+                    </button>
+                </div>
+
+                <!-- Premium Filter Bar -->
+                <div class="bg-gradient-to-br from-white/90 to-white/70 dark:from-secondary-800/90 dark:to-secondary-900/70 backdrop-blur-xl rounded-2xl shadow-soft border border-secondary-200/50 p-5 mb-6">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                        <!-- LEFT SECTION: Search and District -->
+                        <div class="flex flex-col sm:flex-row gap-4 flex-1 lg:flex-none lg:max-w-2xl">
+                            <div class="relative flex-1 sm:flex-none sm:w-64">
+                                <i class="fas fa-search absolute left-4 top-3.5 text-primary-500"></i>
+                                <input type="text" id="search-input" placeholder="Search leads..." class="w-full pl-12 pr-4 py-3 border border-secondary-300 dark:border-secondary-600 rounded-xl bg-white/95 dark:bg-secondary-900/95 focus-gradient-ring focus:border-transparent transition-all duration-300">
+                            </div>
+                            <div class="flex-1 sm:flex-none sm:w-48">
+                                <select id="district-filter" class="w-full px-4 py-3 border border-secondary-300 dark:border-secondary-600 rounded-xl bg-white/95 dark:bg-secondary-900/95 focus-gradient-ring focus:border-transparent transition-all duration-300">
+                                    <option value="">All Districts</option>
+                                    <option>Ranchi</option>
+                                    <option>Gumla</option>
+                                    <option>Lohardaga</option>
+                                    <option>Khunti</option>
+                                    <option>Simdega</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT SECTION: Status Filters -->
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-wrap lg:flex-nowrap">
+                            <!-- Stage filter buttons -->
+                            <div class="flex flex-wrap gap-2 bg-secondary-100/50 dark:bg-secondary-900/30 p-1.5 rounded-xl border border-secondary-200/30 dark:border-secondary-700/30">
+                                <button class="stage-tab min-w-[70px] sm:min-w-[80px] flex-none py-2.5 px-3 sm:px-4 text-sm font-medium rounded-lg bg-gradient-to-r from-primary-500 to-purple-500 text-white shadow-md transition-all duration-300 hover:scale-[1.02]" data-stage="all">All</button>
+                                <button class="stage-tab min-w-[70px] sm:min-w-[80px] flex-none py-2.5 px-3 sm:px-4 text-sm font-medium rounded-lg bg-white/80 dark:bg-secondary-800/80 text-secondary-700 dark:text-secondary-300 hover:bg-gradient-to-r hover:from-primary-500/20 hover:to-purple-500/20 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-300" data-stage="new">New</button>
+                                <button class="stage-tab min-w-[70px] sm:min-w-[80px] flex-none py-2.5 px-3 sm:px-4 text-sm font-medium rounded-lg bg-white/80 dark:bg-secondary-800/80 text-secondary-700 dark:text-secondary-300 hover:bg-gradient-to-r hover:from-primary-500/20 hover:to-purple-500/20 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-300" data-stage="contacted">Contacted</button>
+                                <button class="stage-tab min-w-[70px] sm:min-w-[80px] flex-none py-2.5 px-3 sm:px-4 text-sm font-medium rounded-lg bg-white/80 dark:bg-secondary-800/80 text-secondary-700 dark:text-secondary-300 hover:bg-gradient-to-r hover:from-primary-500/20 hover:to-purple-500/20 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-300" data-stage="replied">Replied</button>
+                            </div>
+                            
+                            <!-- Active/Archived buttons -->
+                            <div class="flex gap-2">
+                                <button class="px-3 sm:px-4 py-2.5 text-sm font-medium rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30 hover:shadow-primary-500/50 hover:scale-[1.02] transition-all duration-300 min-w-[70px] sm:min-w-[80px]">Active</button>
+                                <button class="px-3 sm:px-4 py-2.5 text-sm font-medium rounded-xl border border-secondary-300 dark:border-secondary-700 bg-white/50 dark:bg-secondary-800/50 text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all duration-300 min-w-[70px] sm:min-w-[80px]">Archived</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Premium Data Table -->
+                <div class="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-xl rounded-2xl shadow-card-premium border border-secondary-200/50 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gradient-to-r from-primary-50 to-purple-50 dark:from-primary-900/40 dark:to-purple-900/40 border-b border-secondary-200/50">
+                                <tr>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-secondary-800 dark:text-secondary-200">Business</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-secondary-800 dark:text-secondary-200">Owner</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-secondary-800 dark:text-secondary-200">District</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-secondary-800 dark:text-secondary-200">Type</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-secondary-800 dark:text-secondary-200">Stage</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-secondary-800 dark:text-secondary-200">Status</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-secondary-800 dark:text-secondary-200">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leads-table-body" class="divide-y divide-secondary-200/50">
+                                <!-- Leads will be dynamically inserted here -->
+                                <!-- Empty state row (hidden when data exists) -->
+                                <tr id="empty-state-row" class="hidden">
+                                    <td colspan="7" class="py-12 text-center">
+                                        <div class="animate-fade-in">
+                                            <i class="fas fa-users text-5xl mb-4 text-gradient bg-gradient-to-r from-primary-500 to-purple-500 bg-clip-text text-transparent"></i>
+                                            <p class="text-xl font-semibold text-secondary-800 dark:text-secondary-200">No leads found</p>
+                                            <p class="text-sm text-secondary-600 dark:text-secondary-400 mt-2">Add your first lead using the "Add Lead" button</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Premium Lead Modal -->
+        <div id="lead-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"></div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+                <div class="inline-block align-bottom bg-white dark:bg-secondary-800 rounded-3xl shadow-card-premium text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-secondary-200/50">
+                    <div class="px-8 pt-8 pb-6 bg-gradient-to-r from-primary-500 to-purple-500 dark:from-primary-700 dark:to-purple-700">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-2xl font-bold text-white">Add New Lead</h3>
+                            <button id="modal-close" class="text-white/90 hover:text-white hover:scale-110 transition-transform"><i class="fas fa-times text-xl"></i></button>
+                        </div>
+                        <p class="mt-2 text-sm text-primary-100">Fill in the lead details below.</p>
+                    </div>
+                    <form id="lead-form">
+                        <div class="px-8 py-6 space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="business" class="block text-sm font-medium text-secondary-800 dark:text-secondary-200 mb-2">Business Name *</label>
+                                    <input type="text" id="business" name="business" required class="w-full px-4 py-3.5 border border-secondary-300 dark:border-secondary-600 rounded-xl bg-white/95 dark:bg-secondary-900/95 focus-gradient-ring focus:border-transparent transition-all duration-300">
+                                </div>
+                                <div>
+                                    <label for="owner" class="block text-sm font-medium text-secondary-800 dark:text-secondary-200 mb-2">Owner Name *</label>
+                                    <input type="text" id="owner" name="owner" required class="w-full px-4 py-3.5 border border-secondary-300 dark:border-secondary-600 rounded-xl bg-white/95 dark:bg-secondary-900/95 focus-gradient-ring focus:border-transparent transition-all duration-300">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="district" class="block text-sm font-medium text-secondary-800 dark:text-secondary-200 mb-2">District *</label>
+                                    <select id="district" name="district" required class="w-full px-4 py-3.5 border border-secondary-300 dark:border-secondary-600 rounded-xl bg-white/95 dark:bg-secondary-900/95 focus-gradient-ring focus:border-transparent transition-all duration-300">
+                                        <option value="">Select District</option>
+                                        <option>Ranchi</option>
+                                        <option>Gumla</option>
+                                        <option>Lohardaga</option>
+                                        <option>Khunti</option>
+                                        <option>Simdega</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="type" class="block text-sm font-medium text-secondary-800 dark:text-secondary-200 mb-2">Business Type</label>
+                                    <input type="text" id="type" name="type" class="w-full px-4 py-3.5 border border-secondary-300 dark:border-secondary-600 rounded-xl bg-white/95 dark:bg-secondary-900/95 focus-gradient-ring focus:border-transparent transition-all duration-300">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="px-8 py-6 bg-secondary-50/50 dark:bg-secondary-900/30 border-t border-secondary-200/50 flex justify-end space-x-4">
+                            <button type="button" id="modal-cancel" class="px-6 py-3 border border-secondary-300 dark:border-secondary-700 rounded-xl text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-800 font-medium transition-all duration-300 hover-lift">Cancel</button>
+                            <button type="submit" id="modal-save" class="px-6 py-3 bg-gradient-to-r from-primary-500 to-purple-500 hover:from-primary-600 hover:to-purple-600 text-white font-semibold rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/50 transition-all duration-300 hover-lift">Save Lead</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+    </div>
+
+    <script src="./assets/js/api.js"></script>
+    <script>
+        // Initialize dark mode icon
+        (function() {
+            const html = document.documentElement;
+            const darkIcon = document.getElementById('dark-mode-icon');
+            
+            if (html.classList.contains('dark')) {
+                darkIcon.className = 'fas fa-sun';
+            }
+        })();
+
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const darkModeIcon = document.getElementById('dark-mode-icon');
+        const html = document.documentElement;
+        
+        darkModeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark ? 'true' : 'false');
+            darkModeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        });
+
+        // Sidebar toggle
+        const sidebarMobileToggle = document.getElementById('sidebar-toggle-mobile');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        
+        sidebarMobileToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            sidebar.classList.add('lg:flex', 'fixed', 'inset-y-0', 'left-0', 'z-40');
+            sidebarOverlay.classList.toggle('hidden');
+        });
+        
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.add('hidden');
+            sidebarOverlay.classList.add('hidden');
+        });
+
+        // Modal
+        const addLeadBtn = document.getElementById('add-lead-btn');
+        const leadModal = document.getElementById('lead-modal');
+        const modalClose = document.getElementById('modal-close');
+        const modalCancel = document.getElementById('modal-cancel');
+        
+        addLeadBtn.addEventListener('click', () => leadModal.classList.remove('hidden'));
+        modalClose.addEventListener('click', () => leadModal.classList.add('hidden'));
+        modalCancel.addEventListener('click', () => leadModal.classList.add('hidden'));
+
+        // Lead form submission
+        const leadForm = document.getElementById('lead-form');
+        if (leadForm) {
+            leadForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // Get form data and map to API expected fields
+                const formData = new FormData(leadForm);
+                const rawData = Object.fromEntries(formData.entries());
+                
+                // Transform field names and set defaults
+                const data = {
+                    businessName: rawData.business?.trim() || '',
+                    ownerName: rawData.owner?.trim() || '',
+                    district: rawData.district?.trim() || '',
+                    businessType: rawData.type?.trim() || 'restaurant',
+                    stage: 'new', // default stage as per requirement
+                    status: 'warm', // default from model
+                    // Optional fields can be omitted, backend will use defaults
+                };
+                
+                // Validate required fields
+                if (!data.businessName) {
+                    showToast('Business name is required', 'error');
+                    return;
+                }
+                if (!data.district) {
+                    showToast('District is required', 'error');
+                    return;
+                }
+                
+                // Show loading state on save button
+                const saveButton = document.getElementById('modal-save');
+                const originalText = saveButton.innerHTML;
+                saveButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+                saveButton.disabled = true;
+                
+                try {
+                    // Call API to create lead
+                    const result = await window.api.createLead(data);
+                    
+                    // Success
+                    showToast('Lead added successfully!', 'success');
+                    
+                    // Close modal
+                    leadModal.classList.add('hidden');
+                    
+                    // Reset form
+                    leadForm.reset();
+                    
+                    // Refresh leads table
+                    await fetchLeads();
+                } catch (error) {
+                    console.error('Error creating lead:', error);
+                    let errorMessage = 'Failed to add lead. Please try again.';
+                    if (error.status === 401) {
+                        errorMessage = 'Unauthorized. Please log in.';
+                    } else if (error.status === 400) {
+                        errorMessage = 'Invalid data. Please check your inputs.';
+                    } else if (error.status === 500) {
+                        errorMessage = 'Server error. Please try again later.';
+                    } else if (error.message && error.message.includes('Network')) {
+                        errorMessage = 'Network error. Check your connection.';
+                    }
+                    showToast(errorMessage, 'error');
+                } finally {
+                    // Restore button
+                    saveButton.innerHTML = originalText;
+                    saveButton.disabled = false;
+                }
+            });
+        }
+
+        // Toast
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const colors = {
+                info: 'bg-blue-500 text-white',
+                success: 'bg-green-500 text-white',
+                error: 'bg-red-500 text-white'
+            };
+            const toast = document.createElement('div');
+            toast.className = `${colors[type]} p-4 rounded-lg shadow-lg flex items-center justify-between`;
+            toast.innerHTML = `<span>${message}</span><button onclick="this.parentElement.remove()" class="ml-4"><i class="fas fa-times"></i></button>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        // Empty state management
+        function updateEmptyState() {
+            const tableBody = document.getElementById('leads-table-body');
+            const emptyStateRow = document.getElementById('empty-state-row');
+            if (!tableBody || !emptyStateRow) return;
+
+            // Count rows that are not the empty state row or loading row
+            const rows = tableBody.querySelectorAll('tr:not(#empty-state-row):not(#loading-row)');
+            const hasRows = rows.length > 0;
+
+            if (hasRows) {
+                emptyStateRow.classList.add('hidden');
+            } else {
+                emptyStateRow.classList.remove('hidden');
+            }
+        }
+
+        // Get CSS class for district badge
+        function getDistrictClass(district) {
+            const districtMap = {
+                'ranchi': 'district-ranchi',
+                'gumla': 'district-gumla',
+                'lohardaga': 'district-lohardaga',
+                'khunti': 'district-khunti',
+                'simdega': 'district-simdega'
+            };
+            const key = district.toLowerCase().replace(/\s+/g, '');
+            return districtMap[key] || 'district-ranchi';
+        }
+
+        // Get CSS class for stage badge
+        function getStageClass(stage) {
+            const stageMap = {
+                'new': 'stage-new',
+                'contacted': 'stage-contacted',
+                'replied': 'stage-replied',
+                'demo_sent': 'stage-demo_sent',
+                'closed': 'stage-closed'
+            };
+            return stageMap[stage] || 'stage-new';
+        }
+
+        // Get CSS class for status badge
+        function getStatusClass(status) {
+            const statusMap = {
+                'hot': 'gradient-badge-hot',
+                'warm': 'gradient-badge-warm',
+                'cold': 'gradient-badge-cold'
+            };
+            return statusMap[status] || 'gradient-badge-warm';
+        }
+
+        // Format stage text for display
+        function formatStageText(stage) {
+            const stageTextMap = {
+                'new': 'New',
+                'contacted': 'Contacted',
+                'replied': 'Replied',
+                'demo_sent': 'Demo Sent',
+                'closed': 'Closed'
+            };
+            return stageTextMap[stage] || stage;
+        }
+
+        // Handle lead deletion
+        async function handleDeleteLead(leadId, rowElement) {
+            if (!confirm('Are you sure you want to delete this lead? This action cannot be undone.')) {
+                return;
+            }
+
+            // Show loading state on the button
+            const deleteBtn = rowElement.querySelector('.fa-trash').closest('button');
+            const originalHtml = deleteBtn.innerHTML;
+            deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            deleteBtn.disabled = true;
+
+            try {
+                await window.api.deleteLead(leadId);
+                
+                // Remove row from UI
+                rowElement.remove();
+                
+                // Show success toast
+                showToast('Lead deleted successfully', 'success');
+                
+                // Update empty state
+                updateEmptyState();
+                
+                // Refresh analytics by dispatching a custom event
+                window.dispatchEvent(new CustomEvent('leadsUpdated'));
+                
+                // Alternatively, refresh the leads table (optional)
+                // await fetchLeads();
+            } catch (error) {
+                console.error('Error deleting lead:', error);
+                showToast('Failed to delete lead. Please try again.', 'error');
+                
+                // Restore button
+                deleteBtn.innerHTML = originalHtml;
+                deleteBtn.disabled = false;
+            }
+        }
+
+        // Handle WhatsApp click - update status to Contacted and open WhatsApp
+        async function handleWhatsAppClick(leadId, whatsappNumber) {
+            if (!whatsappNumber) {
+                showToast('No WhatsApp number available', 'error');
+                return;
+            }
+
+            try {
+                // Update lead status to "contacted" via PUT API
+                await window.api.updateLead(leadId, { stage: 'contacted' });
+                
+                // Open WhatsApp in new tab
+                const whatsappUrl = `https://wa.me/${whatsappNumber}`;
+                window.open(whatsappUrl, '_blank');
+                
+                // Show success toast
+                showToast('Status updated to Contacted and WhatsApp opened', 'success');
+                
+                // Refresh leads to show updated status
+                setTimeout(() => fetchLeads(), 1000);
+            } catch (error) {
+                console.error('Error updating lead status:', error);
+                showToast('Failed to update status, but opening WhatsApp...', 'warning');
+                
+                // Still open WhatsApp even if update fails
+                const whatsappUrl = `https://wa.me/${whatsappNumber}`;
+                window.open(whatsappUrl, '_blank');
+            }
+        }
+
+        // Copy text to clipboard
+        function copyToClipboard(text, label = 'Text') {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(`${label} copied to clipboard`, 'success');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                showToast(`Failed to copy ${label}`, 'error');
+            });
+        }
+
+        // Render leads table
+        function renderLeads(leads) {
+            const tableBody = document.getElementById('leads-table-body');
+            if (!tableBody) return;
+
+            // Clear existing rows (except empty state row)
+            const existingRows = tableBody.querySelectorAll('tr:not(#empty-state-row)');
+            existingRows.forEach(row => row.remove());
+
+            // Add each lead as a row
+            leads.forEach(lead => {
+                const leadId = lead._id || lead.id;
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-secondary-50/80 dark:hover:bg-secondary-800/50 transition-colors duration-200';
+                row.innerHTML = `
+                    <td class="py-4 px-6 font-medium text-secondary-900 dark:text-secondary-100">${lead.businessName || 'N/A'}</td>
+                    <td class="py-4 px-6 text-secondary-700 dark:text-secondary-300">${lead.ownerName || 'N/A'}</td>
+                    <td class="py-4 px-6">
+                        <span class="${getDistrictClass(lead.district)} px-3 py-1.5 rounded-full text-xs font-semibold text-white">${lead.district || 'N/A'}</span>
+                    </td>
+                    <td class="py-4 px-6 text-secondary-700 dark:text-secondary-300">${lead.businessType || 'N/A'}</td>
+                    <td class="py-4 px-6">
+                        <span class="${getStageClass(lead.stage)} px-3 py-1.5 rounded-full text-xs font-semibold text-white">${formatStageText(lead.stage)}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="${getStatusClass(lead.status)} px-3 py-1.5 rounded-full text-xs font-semibold">${lead.status ? lead.status.charAt(0).toUpperCase() + lead.status.slice(1) : 'N/A'}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <div class="flex space-x-2">
+                            <button onclick="handleWhatsAppClick('${leadId}', '${lead.whatsapp ? lead.whatsapp.replace(/[^0-9+]/g, '') : ''}')" class="p-2 rounded-lg bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-800 hover:scale-110 hover:shadow-lg hover:shadow-green-500/30 transition-all duration-300 ${!lead.whatsapp ? 'opacity-50 cursor-not-allowed' : ''}" ${!lead.whatsapp ? 'onclick="return false;"' : ''} title="WhatsApp">
+                                <i class="fab fa-whatsapp"></i>
+                            </button>
+                            ${lead.instagram ? `<button onclick="window.open('${lead.instagram.startsWith('http') ? lead.instagram : 'https://instagram.com/' + lead.instagram}', '_blank')" class="p-2 rounded-lg bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-800 hover:scale-110 hover:shadow-lg hover:shadow-pink-500/30 transition-all duration-300" title="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </button>` : `<button class="p-2 rounded-lg bg-gray-100 dark:bg-gray-900/30 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50" title="No Instagram" disabled>
+                                <i class="fab fa-instagram"></i>
+                            </button>`}
+                            ${lead.facebook ? `<button onclick="window.open('${lead.facebook.startsWith('http') ? lead.facebook : 'https://facebook.com/' + lead.facebook}', '_blank')" class="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300" title="Facebook">
+                                <i class="fab fa-facebook"></i>
+                            </button>` : `<button class="p-2 rounded-lg bg-gray-100 dark:bg-gray-900/30 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50" title="No Facebook" disabled>
+                                <i class="fab fa-facebook"></i>
+                            </button>`}
+                            ${lead.website ? `<button onclick="window.open('${lead.website.startsWith('http') ? lead.website : 'https://' + lead.website}', '_blank')" class="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 hover:bg-purple-200 dark:hover:bg-purple-800 hover:scale-110 hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300" title="Website">
+                                <i class="fas fa-globe"></i>
+                            </button>` : `<button class="p-2 rounded-lg bg-gray-100 dark:bg-gray-900/30 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50" title="No Website" disabled>
+                                <i class="fas fa-globe"></i>
+                            </button>`}
+                            ${lead.email ? `<button onclick="copyToClipboard('${lead.email}', 'Email')" class="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-800 hover:scale-110 hover:shadow-lg hover:shadow-yellow-500/30 transition-all duration-300" title="Copy Email">
+                                <i class="fas fa-envelope"></i>
+                            </button>` : `<button class="p-2 rounded-lg bg-gray-100 dark:bg-gray-900/30 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50" title="No Email" disabled>
+                                <i class="fas fa-envelope"></i>
+                            </button>`}
+                            <button class="p-2 rounded-lg bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:bg-primary-200 dark:hover:bg-primary-800 hover:scale-110 hover:shadow-lg hover:shadow-primary-500/30 transition-all duration-300" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="handleDeleteLead('${leadId}', this.closest('tr'))" class="p-2 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-800 hover:scale-110 hover:shadow-lg hover:shadow-red-500/30 transition-all duration-300" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.insertBefore(row, document.getElementById('empty-state-row'));
+            });
+
+            // Update empty state
+            updateEmptyState();
+        }
+
+        // Fetch leads from API
+        async function fetchLeads() {
+            try {
+                // Show loading state (optional)
+                const tableBody = document.getElementById('leads-table-body');
+                if (tableBody) {
+                    const loadingRow = document.createElement('tr');
+                    loadingRow.id = 'loading-row';
+                    loadingRow.innerHTML = `
+                        <td colspan="7" class="py-8 text-center">
+                            <div class="animate-pulse flex justify-center">
+                                <div class="h-8 w-8 rounded-full bg-primary-500/20"></div>
+                            </div>
+                            <p class="mt-2 text-sm text-secondary-600 dark:text-secondary-400">Loading leads...</p>
+                        </td>
+                    `;
+                    tableBody.insertBefore(loadingRow, document.getElementById('empty-state-row'));
+                }
+
+                // Use the global api.getLeads() function from api.js
+                const leads = await window.api.getLeads();
+                
+                // Remove loading row
+                const loadingRow = document.getElementById('loading-row');
+                if (loadingRow) loadingRow.remove();
+
+                // Render leads
+                renderLeads(leads);
+            } catch (error) {
+                console.error('Error fetching leads:', error);
+                
+                // Remove loading row
+                const loadingRow = document.getElementById('loading-row');
+                if (loadingRow) loadingRow.remove();
+
+                // Show error toast
+                showToast('Failed to load leads. Using sample data.', 'error');
+                
+                // Render fallback data (api.getLeads() already provides fallback)
+                const leads = await window.api.getLeads();
+                renderLeads(leads);
+            }
+        }
+
+        // Initialize empty state and fetch leads on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateEmptyState();
+            fetchLeads();
+        });
+    </script>
+</body>
+</html>

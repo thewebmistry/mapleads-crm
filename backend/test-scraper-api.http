@@ -1,0 +1,87 @@
+# Scraper API Test Requests
+# Use with REST Client extension in VSCode or with curl
+
+@baseUrl = http://localhost:5000
+@apiVersion = v1
+
+### Get API Root
+GET {{baseUrl}}/api/{{apiVersion}}
+
+### Test Scraper Service (requires auth)
+GET {{baseUrl}}/api/{{apiVersion}}/scraper/test
+Authorization: Bearer <your-token-here>
+
+### Search Businesses on Google Maps (requires auth)
+POST {{baseUrl}}/api/{{apiVersion}}/scraper/maps-search
+Content-Type: application/json
+Authorization: Bearer <your-token-here>
+
+{
+  "city": "New York",
+  "category": "restaurant",
+  "limit": 5
+}
+
+### Search Businesses on Google Maps - Different City
+POST {{baseUrl}}/api/{{apiVersion}}/scraper/maps-search
+Content-Type: application/json
+Authorization: Bearer <your-token-here>
+
+{
+  "city": "Los Angeles",
+  "category": "technology",
+  "limit": 3
+}
+
+### Search Businesses on Google Maps - More Results
+POST {{baseUrl}}/api/{{apiVersion}}/scraper/maps-search
+Content-Type: application/json
+Authorization: Bearer <your-token-here>
+
+{
+  "city": "Chicago",
+  "category": "retail",
+  "limit": 10
+}
+
+### Test Public Endpoint (development only)
+POST {{baseUrl}}/api/{{apiVersion}}/scraper/maps-search/public
+Content-Type: application/json
+
+{
+  "city": "San Francisco",
+  "category": "cafe",
+  "limit": 2
+}
+
+### Get Scraper Statistics (requires auth)
+GET {{baseUrl}}/api/{{apiVersion}}/scraper/stats
+Authorization: Bearer <your-token-here>
+
+### Test Validation - Missing City
+POST {{baseUrl}}/api/{{apiVersion}}/scraper/maps-search/public
+Content-Type: application/json
+
+{
+  "category": "restaurant",
+  "limit": 5
+}
+
+### Test Validation - Missing Category
+POST {{baseUrl}}/api/{{apiVersion}}/scraper/maps-search/public
+Content-Type: application/json
+
+{
+  "city": "New York",
+  "limit": 5
+}
+
+### Test Validation - Invalid Limit
+POST {{baseUrl}}/api/{{apiVersion}}/scraper/maps-search/public
+Content-Type: application/json
+
+{
+  "city": "New York",
+  "category": "restaurant",
+  "limit": -5
+}

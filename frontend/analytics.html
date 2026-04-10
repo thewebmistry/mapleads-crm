@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics | MapLeads CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+                            400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+                            800: '#1e40af', 900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="assets/js/analytics.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .dark .glassmorphism {
+            background: rgba(30, 41, 59, 0.7);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .shadow-card-premium {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08), 0 0 20px rgba(99, 102, 241, 0.1);
+        }
+        .dark .shadow-card-premium {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 102, 241, 0.15);
+        }
+        .gradient-blue-purple { background: linear-gradient(135deg, #3b82f6, #8b5cf6); }
+        .gradient-green-emerald { background: linear-gradient(135deg, #10b981, #34d399); }
+        .gradient-purple-pink { background: linear-gradient(135deg, #8b5cf6, #ec4899); }
+        .gradient-orange-yellow { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+        .district-bar-gradient-1 { background: linear-gradient(90deg, #3b82f6, #60a5fa, #8b5cf6); }
+        .district-bar-gradient-2 { background: linear-gradient(90deg, #10b981, #34d399, #22c55e); }
+        .district-bar-gradient-3 { background: linear-gradient(90deg, #8b5cf6, #a78bfa, #c4b5fd); }
+        .district-bar-gradient-4 { background: linear-gradient(90deg, #f59e0b, #fbbf24, #fcd34d); }
+        .district-bar-gradient-5 { background: linear-gradient(90deg, #ec4899, #f472b6, #f9a8d4); }
+        .stage-new { background: linear-gradient(90deg, #9ca3af, #d1d5db, #f3f4f6); }
+        .stage-contacted { background: linear-gradient(90deg, #f59e0b, #fbbf24, #fcd34d); }
+        .stage-replied { background: linear-gradient(90deg, #10b981, #34d399, #22c55e); }
+        .stage-demo_sent { background: linear-gradient(90deg, #8b5cf6, #a78bfa, #c4b5fd); }
+        .stage-closed { background: linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd); }
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+            transition: box-shadow 0.3s ease;
+        }
+        .glow-effect:hover {
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+        }
+        .gradient-text {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .counter-animation {
+            transition: all 0.5s ease-out;
+        }
+        .progress-bar-gradient {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+        }
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            position: relative;
+        }
+        .timeline-dot::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: inherit;
+            opacity: 0.3;
+        }
+        .hover-scale {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-scale:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        .dark .hover-scale:hover {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+        .smooth-transition {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Custom CSS Animations */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-border {
+            position: relative;
+            background: linear-gradient(white, white) padding-box,
+                        linear-gradient(135deg, #667eea, #764ba2) border-box;
+            border: 2px solid transparent;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .glow {
+            box-shadow: 0 0 20px rgba(99,102,241,0.5);
+        }
+
+        .transition-all-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Skeleton loading animations */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 4px;
+        }
+        .dark .skeleton {
+            background: linear-gradient(90deg, #2d3748 25%, #4a5568 50%, #2d3748 75%);
+            background-size: 200% 100%;
+        }
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .chart-skeleton {
+            height: 300px;
+            width: 100%;
+            border-radius: 12px;
+        }
+        .skeleton-text {
+            height: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .skeleton-text-sm {
+            height: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+        /* Chart-specific improvements */
+        .chart-container {
+            position: relative;
+            width: 100%;
+        }
+        
+        .chart-card {
+            padding: 1.75rem !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .chart-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+        
+        .dark .chart-card:hover {
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+        }
+        
+        .chart-canvas-wrapper {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            margin-top: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .chart-canvas-wrapper {
+                height: 280px;
+            }
+            
+            .chart-card {
+                padding: 1.25rem !important;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .chart-canvas-wrapper {
+                height: 240px;
+            }
+            
+            .chart-card {
+                padding: 1rem !important;
+            }
+        }
+        
+        /* Premium tooltip styling */
+        .chartjs-tooltip {
+            backdrop-filter: blur(10px);
+            border-radius: 12px !important;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 0 0 20px rgba(99, 102, 241, 0.15) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            padding: 12px 16px !important;
+        }
+        
+        .dark .chartjs-tooltip {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 102, 241, 0.25) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        /* Legend improvements */
+        .chartjs-legend {
+            padding: 12px 0 !important;
+        }
+        
+        .chartjs-legend-item {
+            margin-right: 16px !important;
+            margin-bottom: 8px !important;
+        }
+        
+        /* Mobile stacking improvements */
+        @media (max-width: 1024px) {
+            .chart-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1.5rem !important;
+            }
+        }
+        
+        /* Smooth chart hover animations */
+        .chart-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .chart-hover:hover {
+            filter: brightness(1.05);
+        }
+        
+        /* Dark mode chart color improvements */
+        .dark .chart-grid-line {
+            stroke: rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        .dark .chart-tick {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+    </style>
+    <script>
+        // Initialize dark mode BEFORE page renders
+        (function() {
+            const html = document.documentElement;
+            const savedTheme = localStorage.getItem('darkMode');
+            
+            if (savedTheme === 'true' || (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+            }
+        })();
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
+    
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md border-b border-white/20 dark:border-secondary-700/50 shadow-soft">
+        <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center space-x-4">
+                <button id="sidebar-toggle-mobile" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="flex items-center">
+                    <div class="h-8 w-8 rounded-lg bg-primary-600 flex items-center justify-center">
+                        <i class="fas fa-map-marker-alt text-white"></i>
+                    </div>
+                    <span class="ml-3 text-xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">MapLeads</span>
+                    <span class="ml-1 text-sm font-medium text-primary-600 dark:text-primary-400">CRM</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="dark-mode-toggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <i id="dark-mode-icon" class="fas fa-moon"></i>
+                </button>
+                <div class="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center ring-2 ring-primary-500/50 hover:ring-primary-500 transition-all duration-300">
+                    <i class="fas fa-user text-primary-600 dark:text-primary-400"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex h-[calc(100vh-4rem)]">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="hidden lg:flex flex-col bg-white/80 dark:bg-slate-900 backdrop-blur-md border-r border-gray-200/50 dark:border-slate-800 w-64 transition-all duration-300 shadow-sidebar">
+            <nav class="flex-1 px-4 py-6 space-y-1">
+                <a href="dashboard.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-tachometer-alt w-5 mr-3 group-hover:scale-110 transition-transform"></i>Dashboard
+                </a>
+                <a href="leads.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-users w-5 mr-3 group-hover:scale-110 transition-transform"></i>Leads
+                </a>
+                <a href="map-finder.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-map-pin w-5 mr-3 group-hover:scale-110 transition-transform"></i>Map Finder
+                </a>
+                <a href="kanban.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-columns w-5 mr-3 group-hover:scale-110 transition-transform"></i>Kanban
+                </a>
+                <a href="analytics.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-gradient-to-r from-primary-50 to-transparent dark:from-primary-900/20 border-l-4 border-primary-500 text-primary-700 dark:text-primary-300">
+                    <i class="fas fa-chart-line w-5 mr-3"></i>Analytics
+                </a>
+                <a href="settings.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-cog w-5 mr-3 group-hover:scale-110 transition-transform"></i>Settings
+                </a>
+            </nav>
+            <div class="p-4 border-t border-gray-200 dark:border-slate-800">
+                <button id="sidebar-toggle-desktop" class="w-full flex items-center justify-center p-2 rounded-lg text-gray-600 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200">
+                    <i class="fas fa-chevron-left"></i><span class="ml-2 text-sm">Collapse</span>
+                </button>
+            </div>
+        </aside>
+
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 dark:bg-gray-900">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold">Analytics Dashboard</h1>
+                        <p class="text-gray-600 dark:text-gray-400 mt-1">Key metrics and insights from your leads pipeline</p>
+                    </div>
+                    <button id="refresh-btn" class="mt-4 md:mt-0 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg flex items-center">
+                        <i class="fas fa-sync-alt mr-2"></i> Refresh Data
+                    </button>
+                </div>
+
+                <!-- Key Metrics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Total Leads Card -->
+                    <div class="glassmorphism rounded-2xl p-6 shadow-card-premium hover-scale smooth-transition relative overflow-hidden group">
+                        <div class="absolute inset-0 gradient-blue-purple opacity-10 group-hover:opacity-15 transition-opacity duration-500"></div>
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-blue-600 dark:text-blue-400">Total Leads</p>
+                                    <h3 id="stat-total" class="text-3xl font-bold mt-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent counter-animation">0</h3>
+                                </div>
+                                <div class="h-14 w-14 rounded-xl gradient-blue-purple flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-users text-white text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-blue-500/70 dark:text-blue-400/70 mt-4">All leads in the system</p>
+                            <div class="mt-4 h-1 w-full bg-blue-500/20 rounded-full overflow-hidden">
+                                <div class="h-full gradient-blue-purple rounded-full w-3/4"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conversion Rate Card -->
+                    <div class="glassmorphism rounded-2xl p-6 shadow-card-premium hover-scale smooth-transition relative overflow-hidden group">
+                        <div class="absolute inset-0 gradient-green-emerald opacity-10 group-hover:opacity-15 transition-opacity duration-500"></div>
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-green-600 dark:text-green-400">Conversion Rate</p>
+                                    <h3 id="stat-conversion" class="text-3xl font-bold mt-2 bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent counter-animation">0%</h3>
+                                </div>
+                                <div class="h-14 w-14 rounded-xl gradient-green-emerald flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-chart-line text-white text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-green-500/70 dark:text-green-400/70 mt-4">Closed / Total Leads</p>
+                            <div class="mt-4 h-1 w-full bg-green-500/20 rounded-full overflow-hidden">
+                                <div class="h-full gradient-green-emerald rounded-full w-2/3"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estimated Revenue Card -->
+                    <div class="glassmorphism rounded-2xl p-6 shadow-card-premium hover-scale smooth-transition relative overflow-hidden group">
+                        <div class="absolute inset-0 gradient-purple-pink opacity-10 group-hover:opacity-15 transition-opacity duration-500"></div>
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-purple-600 dark:text-purple-400">Estimated Revenue</p>
+                                    <h3 id="stat-revenue" class="text-3xl font-bold mt-2 bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent counter-animation">₹0</h3>
+                                </div>
+                                <div class="h-14 w-14 rounded-xl gradient-purple-pink flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-rupee-sign text-white text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-purple-500/70 dark:text-purple-400/70 mt-4">From closed leads</p>
+                            <div class="mt-4 h-1 w-full bg-purple-500/20 rounded-full overflow-hidden">
+                                <div class="h-full gradient-purple-pink rounded-full w-1/2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Leads Card -->
+                    <div class="glassmorphism rounded-2xl p-6 shadow-card-premium hover-scale smooth-transition relative overflow-hidden group">
+                        <div class="absolute inset-0 gradient-orange-yellow opacity-10 group-hover:opacity-15 transition-opacity duration-500"></div>
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-orange-600 dark:text-orange-400">Active Leads</p>
+                                    <h3 id="stat-active" class="text-3xl font-bold mt-2 bg-gradient-to-r from-orange-500 to-yellow-500 bg-clip-text text-transparent counter-animation">0</h3>
+                                </div>
+                                <div class="h-14 w-14 rounded-xl gradient-orange-yellow flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-bolt text-white text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-orange-500/70 dark:text-orange-400/70 mt-4">Not closed/archived</p>
+                            <div class="mt-4 h-1 w-full bg-orange-500/20 rounded-full overflow-hidden">
+                                <div class="h-full gradient-orange-yellow rounded-full w-4/5"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Containers - Upgraded with Chart.js -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-8 chart-grid">
+                    <!-- Widget 1: District Performance Bar Chart -->
+                    <div class="glassmorphism rounded-2xl p-6 shadow-card-premium hover-scale smooth-transition relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-50"></div>
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 class="font-semibold text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Leads by District</h3>
+                                    <div class="flex items-center mt-2 space-x-2">
+                                        <div class="relative">
+                                            <select id="district-filter" class="bg-white/50 dark:bg-gray-800/50 border border-blue-500/20 dark:border-blue-500/10 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 appearance-none">
+                                                <option value="all">All Districts</option>
+                                                <option value="top5">Top 5 Districts</option>
+                                                <option value="north">North Region</option>
+                                                <option value="south">South Region</option>
+                                            </select>
+                                            <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500/60 text-xs"></i>
+                                        </div>
+                                        <button id="district-export" class="text-blue-500/70 hover:text-blue-600 dark:text-blue-400/70 dark:hover:text-blue-300 p-1.5 rounded-lg hover:bg-blue-500/10 transition-colors" title="Export chart">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                                    <i class="fas fa-map-marker-alt text-white text-sm"></i>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <div id="district-chart-skeleton" class="chart-skeleton skeleton"></div>
+                                <div class="chart-canvas-wrapper">
+                                    <canvas id="district-bars" class="w-full h-full"></canvas>
+                                </div>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-blue-500/20 dark:border-blue-500/10 flex justify-between items-center">
+                                <p class="text-xs text-blue-600/70 dark:text-blue-400/70 flex items-center">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Hover over bars for detailed insights
+                                </p>
+                                <div class="text-xs text-blue-600/50 dark:text-blue-400/50">
+                                    <i class="fas fa-sync-alt mr-1"></i>
+                                    Auto-updates
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Widget 2: Monthly Revenue Line Chart -->
+                    <div class="glassmorphism rounded-2xl p-6 shadow-card-premium hover-scale smooth-transition relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-50"></div>
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 class="font-semibold text-xl bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Monthly Revenue Trend</h3>
+                                    <div class="flex items-center mt-2 space-x-2">
+                                        <span class="text-xs px-2 py-1 rounded-full bg-green-500/10 text-green-600 dark:text-green-400">Last 12 months</span>
+                                        <button id="revenue-toggle" class="text-green-500/70 hover:text-green-600 dark:text-green-400/70 dark:hover:text-green-300 p-1.5 rounded-lg hover:bg-green-500/10 transition-colors" title="Toggle view">
+                                            <i class="fas fa-chart-line"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                                    <i class="fas fa-rupee-sign text-white text-sm"></i>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <div id="revenue-chart-skeleton" class="chart-skeleton skeleton"></div>
+                                <div class="chart-canvas-wrapper">
+                                    <canvas id="revenue-line" class="w-full h-full"></canvas>
+                                </div>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-green-500/20 dark:border-green-500/10">
+                                <div class="flex justify-between items-center">
+                                    <p class="text-xs text-green-600/70 dark:text-green-400/70 flex items-center">
+                                        <i class="fas fa-info-circle mr-2"></i>
+                                        Revenue from closed deals
+                                    </p>
+                                    <div class="text-xs font-medium bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                                        <span id="revenue-growth">+12.5%</span> growth
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Second Row of Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-8 chart-grid">
+                    <!-- Widget 3: Pipeline Stage Donut Chart -->
+                    <div class="glassmorphism rounded-2xl p-6 shadow-card-premium hover-scale smooth-transition relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-50"></div>
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="font-semibold text-xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Pipeline Stages</h3>
+                                <div class="flex items-center space-x-2">
+                                    <div class="text-xs px-2 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400">Funnel View</div>
+                                    <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                                        <i class="fas fa-filter text-white text-sm"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <div id="pipeline-chart-skeleton" class="chart-skeleton skeleton"></div>
+                                <div class="chart-canvas-wrapper">
+                                    <canvas id="pipeline-donut" class="w-full h-full"></canvas>
+                                </div>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-purple-500/20 dark:border-purple-500/10">
+                                <div class="flex justify-between items-center">
+                                    <p class="text-xs text-purple-600/70 dark:text-purple-400/70 flex items-center">
+                                        <i class="fas fa-info-circle mr-2"></i>
+                                        Click segments to filter leads
+                                    </p>
+                                    <div class="text-xs text-purple-600/50 dark:text-purple-400/50">
+                                        <i class="fas fa-mouse-pointer mr-1"></i>
+                                        Interactive
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Widget 4: Lead Source Pie Chart -->
+                    <div class="glassmorphism rounded-2xl p-6 shadow-card-premium hover-scale smooth-transition relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-yellow-500/5 opacity-50"></div>
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="font-semibold text-xl bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent">Lead Sources</h3>
+                                <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-orange-500 to-yellow-500 flex items-center justify-center">
+                                    <i class="fas fa-chart-pie text-white text-sm"></i>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <div id="lead-source-chart-skeleton" class="chart-skeleton skeleton"></div>
+                                <div class="chart-canvas-wrapper">
+                                    <canvas id="sources-donut" class="w-full h-full"></canvas>
+                                </div>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-orange-500/20 dark:border-orange-500/10">
+                                <div class="flex justify-between items-center">
+                                    <p class="text-xs text-orange-600/70 dark:text-orange-400/70 flex items-center">
+                                        <i class="fas fa-info-circle mr-2"></i>
+                                        Distribution of lead acquisition channels
+                                    </p>
+                                    <div class="text-xs font-medium bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent">
+                                        <span id="top-source">Google Maps</span> leads
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Third Row: Sparkline and Summary -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mb-8 chart-grid">
+                    <!-- Widget 5: Close Ratio Trend Sparkline -->
+                    <div class="glassmorphism rounded-2xl p-6 shadow-card-premium hover-scale smooth-transition relative overflow-hidden lg:col-span-2">
+                        <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-blue-500/5 opacity-50"></div>
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 class="font-semibold text-xl bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">Close Ratio Trend</h3>
+                                    <p class="text-xs text-indigo-600/70 dark:text-indigo-400/70 mt-1">Weekly conversion rate over time</p>
+                                </div>
+                                <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center">
+                                    <i class="fas fa-chart-area text-white text-sm"></i>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <div id="sparkline-chart-skeleton" class="chart-skeleton skeleton h-40"></div>
+                                <div class="chart-canvas-wrapper" style="height: 160px;">
+                                    <canvas id="close-ratio-line" class="w-full h-full"></canvas>
+                                </div>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-indigo-500/20 dark:border-indigo-500/10">
+                                <div class="flex justify-between items-center">
+                                    <div class="text-xs text-indigo-600/70 dark:text-indigo-400/70">
+                                        <i class="fas fa-calendar-alt mr-1"></i>
+                                        Last 8 weeks
+                                    </div>
+                                    <div class="text-xs font-medium bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+                                        Current: <span id="current-close-ratio">42%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Widget 6: Quick Stats -->
+                    <div class="glassmorphism rounded-2xl p-6 shadow-card-premium hover-scale smooth-transition relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-gray-500/5 to-gray-700/5 opacity-50"></div>
+                        <div class="relative z-10">
+                            <h3 class="font-semibold text-xl bg-gradient-to-r from-gray-600 to-gray-700 bg-clip-text text-transparent mb-6">Quick Stats</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Avg Deal Size</span>
+                                    <span class="font-semibold text-gray-800 dark:text-gray-200">₹2.4L</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Sales Cycle</span>
+                                    <span class="font-semibold text-gray-800 dark:text-gray-200">18 days</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Response Time</span>
+                                    <span class="font-semibold text-gray-800 dark:text-gray-200">4.2 hrs</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Lead Quality</span>
+                                    <span class="font-semibold text-gray-800 dark:text-gray-200">8.2/10</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Widget 3: Top Business Type -->
+                <div class="glassmorphism rounded-2xl p-6 mb-8 shadow-card-premium hover-scale smooth-transition relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 opacity-50 group-hover:opacity-70 transition-opacity duration-500"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="font-semibold text-xl bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Top Business Type</h3>
+                            <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                                <i class="fas fa-chart-pie text-white text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between">
+                            <div class="mb-6 md:mb-0 md:mr-8">
+                                <div class="flex items-center mb-4">
+                                    <div class="h-20 w-20 rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform duration-300">
+                                        <i class="fas fa-shopping-cart text-white text-3xl"></i>
+                                    </div>
+                                    <div class="ml-6">
+                                        <h4 id="niche-name" class="text-3xl font-bold bg-gradient-to-r from-emerald-700 to-teal-700 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent">-</h4>
+                                        <p class="text-emerald-600/70 dark:text-emerald-400/70 mt-1 text-sm">Most common business type</p>
+                                    </div>
+                                </div>
+                                <div class="mt-6">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">Market Share</span>
+                                        <span id="niche-percentage" class="text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">0%</span>
+                                    </div>
+                                    <div class="h-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-full overflow-hidden">
+                                        <div id="niche-progress" class="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center md:items-end">
+                                <div id="niche-count" class="text-5xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">0</div>
+                                <div class="text-sm text-emerald-600/70 dark:text-emerald-400/70 mb-4">leads</div>
+                                <div class="text-xs text-emerald-500/60 dark:text-emerald-400/60 text-center md:text-right">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    <span>Dominant category in your pipeline</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Widget 4: Recent Activity -->
+                <div class="glassmorphism rounded-2xl p-6 mb-8 shadow-card-premium hover-scale smooth-transition relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-50"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="font-semibold text-xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Recent Activity</h3>
+                            <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                                <i class="fas fa-stream text-white text-sm"></i>
+                            </div>
+                        </div>
+                        <div id="recent-activity" class="relative">
+                            <div class="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-indigo-300/50 to-purple-300/50 dark:from-indigo-500/30 dark:to-purple-500/30"></div>
+                            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-history text-3xl mb-2"></i>
+                                <p class="text-sm">Loading recent activity...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+    </div>
+
+    <script src="./assets/js/api.js"></script>
+    <script>
+        // Initialize dark mode icon
+        (function() {
+            const html = document.documentElement;
+            const darkIcon = document.getElementById('dark-mode-icon');
+            
+            if (html.classList.contains('dark')) {
+                darkIcon.className = 'fas fa-sun';
+            }
+        })();
+
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const darkModeIcon = document.getElementById('dark-mode-icon');
+        const html = document.documentElement;
+        
+        darkModeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark ? 'true' : 'false');
+            darkModeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            
+            // Update charts to reflect dark/light mode changes
+            setTimeout(() => {
+                updateAllCharts();
+            }, 100);
+        });
+
+        // Sidebar toggles
+        const sidebarMobileToggle = document.getElementById('sidebar-toggle-mobile');
+        const sidebarDesktopToggle = document.getElementById('sidebar-toggle-desktop');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const sidebar = document.getElementById('sidebar');
+        
+        sidebarMobileToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            sidebarOverlay.classList.toggle('hidden');
+        });
+        
+        sidebarDesktopToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+        });
+        
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.add('hidden');
+            sidebarOverlay.classList.add('hidden');
+        });
+
+        // Analytics data
+        let leads = [];
+        
+        // Chart instances
+        let districtChart = null;
+        let revenueChart = null;
+        let pipelineChart = null;
+        let leadSourceChart = null;
+        let sparklineChart = null;
+
+        // Function to update all charts for dark mode
+        function updateAllCharts() {
+            if (districtChart) {
+                districtChart.destroy();
+                renderDistrictChart();
+            }
+            if (revenueChart) {
+                revenueChart.destroy();
+                renderRevenueChart();
+            }
+            if (pipelineChart) {
+                pipelineChart.destroy();
+                renderPipelineChart();
+            }
+            if (leadSourceChart) {
+                leadSourceChart.destroy();
+                renderLeadSourceChart();
+            }
+            if (sparklineChart) {
+                sparklineChart.destroy();
+                renderSparklineChart();
+            }
+        }
+
+        // Refresh button and analytics functionality moved to analytics.js
+        // const refreshBtn = document.getElementById('refresh-btn');
+        // refreshBtn.addEventListener('click', fetchLeads);
+        
+        // District filter will be handled by analytics.js if needed
+        // document.getElementById('district-filter')?.addEventListener('change', function() {
+        //     if (districtChart) {
+        //         updateDistrictChart();
+        //     }
+        // });
+
+        async function fetchLeads() {
+            try {
+                showToast('Fetching leads data...', 'info');
+                const response = await api.getLeads({limit: 1000});
+                leads = response.data || response;
+                processAnalytics();
+                showToast('Analytics updated successfully', 'success');
+            } catch (error) {
+                console.error('Failed to fetch leads:', error);
+                showToast('Failed to load leads data. Using mock data instead.', 'warning');
+                // Generate mock leads data as fallback
+                leads = generateMockLeads();
+                processAnalytics();
+            }
+        }
+
+        function generateMockLeads() {
+            const mockLeads = [];
+            const districts = [
+                { name: 'Ranchi', count: 45 },
+                { name: 'Lohardaga', count: 28 },
+                { name: 'Gumla', count: 18 },
+                { name: 'Simdega', count: 12 }
+            ];
+            
+            // Stage distribution exactly as specified
+            const stagePool = [];
+            for (let i = 0; i < 30; i++) stagePool.push('new');
+            for (let i = 0; i < 22; i++) stagePool.push('contacted');
+            for (let i = 0; i < 15; i++) stagePool.push('replied');
+            for (let i = 0; i < 9; i++) stagePool.push('demo_sent');
+            for (let i = 0; i < 6; i++) stagePool.push('closed');
+            
+            // Source distribution exactly as specified
+            const sourcePool = [];
+            for (let i = 0; i < 45; i++) sourcePool.push('Google Maps');
+            for (let i = 0; i < 20; i++) sourcePool.push('WhatsApp');
+            for (let i = 0; i < 18; i++) sourcePool.push('Instagram');
+            for (let i = 0; i < 10; i++) sourcePool.push('Website');
+            for (let i = 0; i < 7; i++) sourcePool.push('Referral');
+            
+            // Shuffle arrays to randomize assignment
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+            
+            const shuffledStages = shuffleArray([...stagePool]);
+            const shuffledSources = shuffleArray([...sourcePool]);
+            
+            // Create leads based on district distribution (total 103 leads)
+            let leadId = 1;
+            let stageIndex = 0;
+            let sourceIndex = 0;
+            
+            districts.forEach(district => {
+                for (let i = 0; i < district.count; i++) {
+                    const stage = shuffledStages[stageIndex % shuffledStages.length];
+                    const source = shuffledSources[sourceIndex % shuffledSources.length];
+                    
+                    // Generate appropriate budget for closed leads
+                    let budget = 0;
+                    if (stage === 'closed') {
+                        // Use revenue data pattern: 12000, 18000, 25000, 30000, 22000, 40000
+                        const closedBudgets = [12000, 18000, 25000, 30000, 22000, 40000];
+                        budget = closedBudgets[Math.min(mockLeads.filter(l => l.stage === 'closed').length, closedBudgets.length - 1)];
+                    }
+                    
+                    mockLeads.push({
+                        id: leadId++,
+                        name: `Lead ${leadId}`,
+                        district: district.name,
+                        stage: stage,
+                        source: source,
+                        budget: budget,
+                        created_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString() // Random date within last 30 days
+                    });
+                    
+                    stageIndex++;
+                    sourceIndex++;
+                }
+            });
+
+            return mockLeads;
+        }
+
+        function animateCounter(element, start, end, duration = 1000, prefix = '', suffix = '') {
+            if (!element) return;
+            
+            const startTime = performance.now();
+            const formatNumber = (num) => {
+                if (typeof num === 'number' && (suffix === '%' || suffix === '')) {
+                    return num.toLocaleString();
+                }
+                return num;
+            };
+            
+            const animate = (currentTime) => {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+                const currentValue = Math.floor(start + (end - start) * easeProgress);
+                
+                element.textContent = prefix + formatNumber(currentValue) + suffix;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    element.textContent = prefix + formatNumber(end) + suffix;
+                }
+            };
+            
+            requestAnimationFrame(animate);
+        }
+
+        function processAnalytics() {
+            if (!leads || leads.length === 0) {
+                resetMetrics();
+                return;
+            }
+
+            const totalLeads = leads.length;
+            const closedLeads = leads.filter(lead => (lead.stage || '').toLowerCase() === 'closed');
+            const conversionRate = leads.length > 0 ? Math.round((closedLeads.length / leads.length) * 100) : 0;
+            const estimatedRevenue = closedLeads.reduce((sum, lead) => sum + (parseFloat(lead.budget) || 0), 0);
+            const activeLeads = leads.filter(lead => {
+                const stage = (lead.stage || '').toLowerCase();
+                return !['closed', 'archived'].includes(stage);
+            }).length;
+
+            // Animate counters
+            animateCounter(document.getElementById('stat-total'), 0, totalLeads, 800);
+            animateCounter(document.getElementById('stat-conversion'), 0, conversionRate, 800, '', '%');
+            animateCounter(document.getElementById('stat-revenue'), 0, estimatedRevenue, 800, '₹');
+            animateCounter(document.getElementById('stat-active'), 0, activeLeads, 800);
+
+            renderDistrictChart();
+            renderPipelineChart();
+            renderRevenueChart();
+            renderLeadSourceChart();
+            renderSparklineChart();
+            renderTopNiche();
+            renderRecentActivity();
+        }
+
+        function resetMetrics() {
+            // Reset KPI counters
+            document.getElementById('stat-total').textContent = '0';
+            document.getElementById('stat-conversion').textContent = '0%';
+            document.getElementById('stat-revenue').textContent = '₹0';
+            document.getElementById('stat-active').textContent = '0';
+            
+            // Destroy all chart instances
+            if (districtChart) {
+                districtChart.destroy();
+                districtChart = null;
+            }
+            if (revenueChart) {
+                revenueChart.destroy();
+                revenueChart = null;
+            }
+            if (pipelineChart) {
+                pipelineChart.destroy();
+                pipelineChart = null;
+            }
+            if (leadSourceChart) {
+                leadSourceChart.destroy();
+                leadSourceChart = null;
+            }
+            if (sparklineChart) {
+                sparklineChart.destroy();
+                sparklineChart = null;
+            }
+            
+            // Show skeletons and hide canvases
+            const chartContainers = [
+                { canvas: 'district-bars', skeleton: 'district-chart-skeleton' },
+                { canvas: 'revenue-line', skeleton: 'revenue-chart-skeleton' },
+                { canvas: 'pipeline-donut', skeleton: 'pipeline-chart-skeleton' },
+                { canvas: 'sources-donut', skeleton: 'lead-source-chart-skeleton' },
+                { canvas: 'close-ratio-line', skeleton: 'sparkline-chart-skeleton' }
+            ];
+            
+            chartContainers.forEach(container => {
+                const canvas = document.getElementById(container.canvas);
+                const skeleton = document.getElementById(container.skeleton);
+                if (canvas && skeleton) {
+                    canvas.classList.add('hidden');
+                    skeleton.classList.remove('hidden');
+                }
+            });
+            
+            // Reset other UI elements
+            document.getElementById('niche-name').textContent = '-';
+            document.getElementById('niche-count').textContent = '0';
+            document.getElementById('recent-activity').innerHTML = '<div class="text-center py-8 text-gray-500/70 dark:text-gray-400/70"><i class="fas fa-history text-3xl mb-2"></i><p class="text-sm">No recent activity</p></div>';
+        }
+
+        function renderDistrictChart() {
+            const canvas = document.getElementById('district-bars');
+            const skeleton = document.getElementById('district-chart-skeleton');
+            if (!canvas || !skeleton) return;
+            
+            // Hide skeleton, show canvas
+            skeleton.classList.add('hidden');
+            canvas.classList.remove('hidden');
+            
+            // Destroy existing chart
+            if (districtChart) {
+                districtChart.destroy();
+            }
+            
+            // Use provided data: District Leads = Ranchi 45, Lohardaga 28, Gumla 18, Simdega 12
+            const districtData = [
+                { name: 'Ranchi', count: 45 },
+                { name: 'Lohardaga', count: 28 },
+                { name: 'Gumla', count: 18 },
+                { name: 'Simdega', count: 12 }
+            ];
+            
+            const isDark = document.documentElement.classList.contains('dark');
+            const labels = districtData.map(d => d.name);
+            const data = districtData.map(d => d.count);
+            const totalLeads = data.reduce((sum, count) => sum + count, 0);
+            
+            // Create gradient for bars using premium SaaS colors (blue to purple)
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.9)'); // blue-500
+            gradient.addColorStop(0.5, 'rgba(99, 102, 241, 0.8)'); // indigo-500
+            gradient.addColorStop(1, 'rgba(147, 51, 234, 0.7)'); // purple-600
+            
+            districtChart = new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Leads',
+                        data: data,
+                        backgroundColor: gradient,
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 1,
+                        borderRadius: 12,
+                        borderSkipped: false,
+                        hoverBackgroundColor: 'rgba(99, 102, 241, 0.9)',
+                        hoverBorderColor: 'rgba(99, 102, 241, 1)',
+                        hoverBorderWidth: 2,
+                        hoverRadius: 0,
+                        categoryPercentage: 0.7,
+                        barPercentage: 0.85,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? 'rgba(17, 24, 39, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+                            titleColor: isDark ? '#f3f4f6' : '#111827',
+                            bodyColor: isDark ? '#e5e7eb' : '#374151',
+                            borderColor: 'rgba(59, 130, 246, 0.4)',
+                            borderWidth: 1.5,
+                            cornerRadius: 12,
+                            displayColors: true,
+                            padding: { top: 12, right: 16, bottom: 12, left: 16 },
+                            boxPadding: 8,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function(context) {
+                                    const percentage = totalLeads > 0 ? ((context.raw / totalLeads) * 100).toFixed(1) : 0;
+                                    return `${context.raw} leads (${percentage}% of total)`;
+                                },
+                                title: function(tooltipItems) {
+                                    return tooltipItems[0].label;
+                                }
+                            },
+                            titleFont: {
+                                size: 13,
+                                weight: '600',
+                                family: "'Inter', sans-serif"
+                            },
+                            bodyFont: {
+                                size: 12,
+                                family: "'Inter', sans-serif"
+                            },
+                            footerFont: {
+                                size: 11,
+                                family: "'Inter', sans-serif"
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: isDark ? 'rgba(75, 85, 99, 0.4)' : 'rgba(229, 231, 235, 0.6)',
+                                drawBorder: false,
+                                borderDash: isDark ? [4, 4] : undefined
+                            },
+                            ticks: {
+                                color: isDark ? '#d1d5db' : '#6b7280',
+                                font: {
+                                    size: 11,
+                                    family: "'Inter', sans-serif"
+                                },
+                                padding: 10
+                            },
+                            border: {
+                                display: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: isDark ? '#d1d5db' : '#6b7280',
+                                font: {
+                                    size: 11,
+                                    family: "'Inter', sans-serif"
+                                },
+                                maxRotation: 45,
+                                padding: 8
+                            },
+                            border: {
+                                display: false
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+        
+        function updateDistrictChart() {
+            if (!districtChart) return;
+            renderDistrictChart();
+        }
+
+        function renderPipelineChart() {
+            const canvas = document.getElementById('pipeline-donut');
+            const skeleton = document.getElementById('pipeline-chart-skeleton');
+            if (!canvas || !skeleton) return;
+            
+            // Hide skeleton, show canvas
+            skeleton.classList.add('hidden');
+            canvas.classList.remove('hidden');
+            
+            // Destroy existing chart
+            if (pipelineChart) {
+                pipelineChart.destroy();
+            }
+            
+            const stages = [
+                {id: 'new', name: 'New', color: 'rgba(156, 163, 175, 0.8)'},
+                {id: 'contacted', name: 'Contacted', color: 'rgba(245, 158, 11, 0.8)'},
+                {id: 'replied', name: 'Replied', color: 'rgba(34, 197, 94, 0.8)'},
+                {id: 'demo_sent', name: 'Demo Sent', color: 'rgba(168, 85, 247, 0.8)'},
+                {id: 'closed', name: 'Closed', color: 'rgba(59, 130, 246, 0.8)'}
+            ];
+            
+            // Static pipeline data
+            const stageCounts = {
+                new: 30,
+                contacted: 22,
+                replied: 15,
+                demo_sent: 9,
+                closed: 6
+            };
+            
+            const labels = stages.map(s => s.name);
+            const data = stages.map(s => stageCounts[s.id]);
+            const backgroundColors = stages.map(s => s.color);
+            const borderColors = stages.map(s => s.color.replace('0.8', '1'));
+            const total = data.reduce((sum, val) => sum + val, 0);
+            
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            pipelineChart = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 2,
+                        hoverOffset: 20,
+                        hoverBackgroundColor: backgroundColors.map(color => color.replace('0.8', '0.95')),
+                        hoverBorderColor: borderColors,
+                        hoverBorderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 24,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                pointStyleWidth: 10,
+                                boxWidth: 12,
+                                boxHeight: 12,
+                                color: isDark ? '#d1d5db' : '#4b5563',
+                                font: {
+                                    size: 12,
+                                    family: "'Inter', sans-serif",
+                                    weight: '500'
+                                }
+                            },
+                            align: 'center',
+                            maxWidth: 400,
+                            fullSize: true
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? 'rgba(17, 24, 39, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+                            titleColor: isDark ? '#f3f4f6' : '#111827',
+                            bodyColor: isDark ? '#e5e7eb' : '#374151',
+                            borderColor: 'rgba(168, 85, 247, 0.4)',
+                            borderWidth: 1.5,
+                            cornerRadius: 12,
+                            padding: { top: 12, right: 16, bottom: 12, left: 16 },
+                            boxPadding: 8,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${context.label}: ${value} leads (${percentage}%)`;
+                                },
+                                title: function(tooltipItems) {
+                                    return 'Pipeline Stage';
+                                }
+                            },
+                            titleFont: {
+                                size: 13,
+                                weight: '600',
+                                family: "'Inter', sans-serif"
+                            },
+                            bodyFont: {
+                                size: 12,
+                                family: "'Inter', sans-serif"
+                            }
+                        }
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true,
+                        duration: 1200
+                    }
+                }
+            });
+        }
+
+        function renderRevenueChart() {
+            const canvas = document.getElementById('revenue-line');
+            const skeleton = document.getElementById('revenue-chart-skeleton');
+            if (!canvas || !skeleton) return;
+            
+            skeleton.classList.add('hidden');
+            canvas.classList.remove('hidden');
+            
+            if (revenueChart) {
+                revenueChart.destroy();
+            }
+            
+            // Use provided data: Revenue = Jan 12000, Feb 18000, Mar 25000, Apr 30000, May 22000, Jun 40000
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            const revenueData = [12000, 18000, 25000, 30000, 22000, 40000];
+            
+            const isDark = document.documentElement.classList.contains('dark');
+            const ctx = canvas.getContext('2d');
+            
+            // Create gradient for line chart using premium SaaS colors (green to emerald)
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(34, 197, 94, 0.8)'); // green-500
+            gradient.addColorStop(0.5, 'rgba(16, 185, 129, 0.6)'); // emerald-500
+            gradient.addColorStop(1, 'rgba(5, 150, 105, 0.2)'); // emerald-600
+            
+            revenueChart = new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Revenue (₹)',
+                        data: revenueData,
+                        backgroundColor: gradient,
+                        borderColor: 'rgba(34, 197, 94, 1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: 'rgba(34, 197, 94, 1)',
+                        pointBorderColor: isDark ? '#111827' : '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? 'rgba(17, 24, 39, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+                            titleColor: isDark ? '#f3f4f6' : '#111827',
+                            bodyColor: isDark ? '#e5e7eb' : '#374151',
+                            borderColor: 'rgba(34, 197, 94, 0.4)',
+                            borderWidth: 1.5,
+                            cornerRadius: 12,
+                            padding: { top: 12, right: 16, bottom: 12, left: 16 },
+                            boxPadding: 8,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Revenue: ₹${context.raw.toLocaleString()}`;
+                                },
+                                title: function(tooltipItems) {
+                                    return `Month: ${tooltipItems[0].label}`;
+                                }
+                            },
+                            titleFont: {
+                                size: 13,
+                                weight: '600',
+                                family: "'Inter', sans-serif"
+                            },
+                            bodyFont: {
+                                size: 12,
+                                family: "'Inter', sans-serif"
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: isDark ? 'rgba(75, 85, 99, 0.4)' : 'rgba(229, 231, 235, 0.6)',
+                                drawBorder: false,
+                                borderDash: isDark ? [4, 4] : undefined
+                            },
+                            ticks: {
+                                color: isDark ? '#d1d5db' : '#6b7280',
+                                font: {
+                                    size: 11,
+                                    family: "'Inter', sans-serif"
+                                },
+                                padding: 10,
+                                callback: function(value) {
+                                    if (value >= 1000) {
+                                        return '₹' + (value / 1000).toFixed(0) + 'K';
+                                    }
+                                    return '₹' + value;
+                                }
+                            },
+                            border: {
+                                display: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: isDark ? 'rgba(75, 85, 99, 0.2)' : 'rgba(229, 231, 235, 0.4)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: isDark ? '#d1d5db' : '#6b7280',
+                                font: {
+                                    size: 11,
+                                    family: "'Inter', sans-serif"
+                                },
+                                padding: 10
+                            },
+                            border: {
+                                display: false
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+        
+        function renderLeadSourceChart() {
+            const canvas = document.getElementById('sources-donut');
+            const skeleton = document.getElementById('lead-source-chart-skeleton');
+            if (!canvas || !skeleton) return;
+            
+            skeleton.classList.add('hidden');
+            canvas.classList.remove('hidden');
+            
+            if (leadSourceChart) {
+                leadSourceChart.destroy();
+            }
+            
+            // Lead source data - static values provided
+            const sources = [
+                { name: 'Google Maps', value: 45, color: 'rgba(59, 130, 246, 0.8)' },
+                { name: 'WhatsApp', value: 20, color: 'rgba(34, 197, 94, 0.8)' },
+                { name: 'Instagram', value: 18, color: 'rgba(236, 72, 153, 0.8)' },
+                { name: 'Website', value: 10, color: 'rgba(245, 158, 11, 0.8)' },
+                { name: 'Referral', value: 7, color: 'rgba(168, 85, 247, 0.8)' }
+            ];
+            
+            const isDark = document.documentElement.classList.contains('dark');
+            const total = sources.reduce((sum, s) => sum + s.value, 0);
+            
+            leadSourceChart = new Chart(canvas, {
+                type: 'pie',
+                data: {
+                    labels: sources.map(s => s.name),
+                    datasets: [{
+                        data: sources.map(s => s.value),
+                        backgroundColor: sources.map(s => s.color),
+                        borderColor: sources.map(s => s.color.replace('0.8', '1')),
+                        borderWidth: 2,
+                        hoverOffset: 25,
+                        hoverBackgroundColor: sources.map(s => s.color.replace('0.8', '0.95')),
+                        hoverBorderColor: sources.map(s => s.color.replace('0.8', '1')),
+                        hoverBorderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 16,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                pointStyleWidth: 10,
+                                boxWidth: 12,
+                                boxHeight: 12,
+                                color: isDark ? '#d1d5db' : '#4b5563',
+                                font: {
+                                    size: 12,
+                                    family: "'Inter', sans-serif",
+                                    weight: '500'
+                                }
+                            },
+                            align: 'center',
+                            maxWidth: 200,
+                            fullSize: true
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? 'rgba(17, 24, 39, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+                            titleColor: isDark ? '#f3f4f6' : '#111827',
+                            bodyColor: isDark ? '#e5e7eb' : '#374151',
+                            borderColor: 'rgba(59, 130, 246, 0.4)',
+                            borderWidth: 1.5,
+                            cornerRadius: 12,
+                            padding: { top: 12, right: 16, bottom: 12, left: 16 },
+                            boxPadding: 8,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${context.label}: ${value} leads (${percentage}% of total)`;
+                                },
+                                title: function(tooltipItems) {
+                                    return 'Lead Source';
+                                }
+                            },
+                            titleFont: {
+                                size: 13,
+                                weight: '600',
+                                family: "'Inter', sans-serif"
+                            },
+                            bodyFont: {
+                                size: 12,
+                                family: "'Inter', sans-serif"
+                            }
+                        }
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true,
+                        duration: 1200
+                    }
+                }
+            });
+        }
+        
+        function renderSparklineChart() {
+            const canvas = document.getElementById('close-ratio-line');
+            const skeleton = document.getElementById('sparkline-chart-skeleton');
+            if (!canvas || !skeleton) return;
+            
+            skeleton.classList.add('hidden');
+            canvas.classList.remove('hidden');
+            
+            if (sparklineChart) {
+                sparklineChart.destroy();
+            }
+            
+            // Weekly performance data
+            const weeks = ['Week1', 'Week2', 'Week3', 'Week4', 'Week5', 'Week6'];
+            const values = [10, 18, 24, 31, 36, 42];
+            
+            const isDark = document.documentElement.classList.contains('dark');
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.8)'); // blue-500
+            gradient.addColorStop(0.5, 'rgba(99, 102, 241, 0.6)'); // indigo-500
+            gradient.addColorStop(1, 'rgba(139, 92, 246, 0.1)'); // purple-500
+            
+            sparklineChart = new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: weeks,
+                    datasets: [{
+                        label: 'Weekly Performance',
+                        data: values,
+                        backgroundColor: gradient,
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                        pointBorderColor: isDark ? '#111827' : '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? 'rgba(17, 24, 39, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+                            titleColor: isDark ? '#f3f4f6' : '#111827',
+                            bodyColor: isDark ? '#e5e7eb' : '#374151',
+                            borderColor: 'rgba(59, 130, 246, 0.4)',
+                            borderWidth: 1.5,
+                            cornerRadius: 12,
+                            padding: { top: 10, right: 14, bottom: 10, left: 14 },
+                            boxPadding: 6,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Close Ratio: ${context.raw}%`;
+                                },
+                                title: function(tooltipItems) {
+                                    return `Week: ${tooltipItems[0].label}`;
+                                }
+                            },
+                            titleFont: {
+                                size: 12,
+                                weight: '600',
+                                family: "'Inter', sans-serif"
+                            },
+                            bodyFont: {
+                                size: 11,
+                                family: "'Inter', sans-serif"
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 50,
+                            grid: {
+                                color: isDark ? 'rgba(55, 65, 81, 0.1)' : 'rgba(229, 231, 235, 0.3)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: isDark ? '#9ca3af' : '#6b7280',
+                                font: { size: 10 },
+                                callback: function(value) {
+                                    return value;
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: isDark ? '#9ca3af' : '#6b7280',
+                                font: { size: 10 }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    animation: {
+                        duration: 1200,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+
+        function renderTopNiche() {
+            const nicheMap = {};
+            
+            leads.forEach(lead => {
+                const niche = lead.businessType || lead.type || lead.business || 'Unknown';
+                nicheMap[niche] = (nicheMap[niche] || 0) + 1;
+            });
+            
+            let topNiche = '-';
+            let topCount = 0;
+            
+            Object.entries(nicheMap).forEach(([niche, count]) => {
+                if (count > topCount) {
+                    topNiche = niche;
+                    topCount = count;
+                }
+            });
+            
+            document.getElementById('niche-name').textContent = topNiche;
+            document.getElementById('niche-count').textContent = topCount;
+            
+            // Calculate percentage of total leads
+            const percentage = leads.length > 0 ? Math.round((topCount / leads.length) * 100) : 0;
+            const percentageElement = document.getElementById('niche-percentage');
+            const progressElement = document.getElementById('niche-progress');
+            
+            if (percentageElement) {
+                percentageElement.textContent = `${percentage}%`;
+            }
+            if (progressElement) {
+                // Animate the progress bar
+                setTimeout(() => {
+                    progressElement.style.width = `${percentage}%`;
+                }, 100);
+            }
+        }
+
+        function renderRecentActivity() {
+            const recentActivity = document.getElementById('recent-activity');
+            if (!recentActivity) return;
+            
+            const sortedLeads = [...leads]
+                .sort((a, b) => {
+                    const dateA = new Date(a.updatedAt || a.createdAt || 0);
+                    const dateB = new Date(b.updatedAt || b.createdAt || 0);
+                    return dateB - dateA;
+                })
+                .slice(0, 5);
+            
+            if (sortedLeads.length === 0) {
+                recentActivity.innerHTML = '<div class="text-center py-8 text-gray-500/70 dark:text-gray-400/70"><i class="fas fa-history text-3xl mb-2"></i><p class="text-sm">No recent activity</p></div>';
+                return;
+            }
+            
+            const stageGradients = {
+                'new': 'bg-gradient-to-r from-gray-400 to-gray-300',
+                'contacted': 'bg-gradient-to-r from-yellow-500 to-orange-400',
+                'replied': 'bg-gradient-to-r from-green-500 to-emerald-400',
+                'demo_sent': 'bg-gradient-to-r from-purple-500 to-violet-400',
+                'closed': 'bg-gradient-to-r from-blue-500 to-cyan-400'
+            };
+            
+            const stageIcons = {
+                'new': 'fas fa-plus-circle',
+                'contacted': 'fas fa-phone',
+                'replied': 'fas fa-reply',
+                'demo_sent': 'fas fa-paper-plane',
+                'closed': 'fas fa-check-circle'
+            };
+            
+            const stageNames = {
+                'new': 'New',
+                'contacted': 'Contacted',
+                'replied': 'Replied',
+                'demo_sent': 'Demo Sent',
+                'closed': 'Closed'
+            };
+            
+            let activityHTML = '<div class="space-y-0">';
+            sortedLeads.forEach((lead, index) => {
+                const businessName = lead.businessName || lead.business || 'Unnamed Lead';
+                const stage = (lead.stage || 'new').toLowerCase();
+                const stageName = stageNames[stage] || 'New';
+                const date = new Date(lead.updatedAt || lead.createdAt || Date.now());
+                const timeAgo = getTimeAgo(date);
+                const gradient = stageGradients[stage] || stageGradients['new'];
+                const icon = stageIcons[stage] || stageIcons['new'];
+                
+                activityHTML += `
+                    <div class="group relative flex items-start py-5 hover:bg-white/30 dark:hover:bg-gray-800/30 rounded-xl px-4 transition-all duration-300 smooth-transition">
+                        <div class="absolute left-6 top-10 bottom-0 w-0.5 ${index === sortedLeads.length - 1 ? 'opacity-0' : 'bg-gradient-to-b from-gray-300 to-transparent dark:from-gray-600'}"></div>
+                        <div class="relative z-10 mr-4 mt-1">
+                            <div class="timeline-dot ${gradient}"></div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between">
+                                <div class="mb-2 md:mb-0">
+                                    <h4 class="font-semibold text-gray-800 dark:text-gray-200">${businessName}</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 flex items-center">
+                                        <i class="${icon} mr-2 ${gradient.replace('bg-gradient-to-r', 'text')}"></i>
+                                        ${stageName} • ${timeAgo}
+                                    </p>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-xs font-medium px-3 py-1.5 rounded-full ${gradient} text-white shadow-sm">${stageName}</span>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                <div class="flex items-center mr-4">
+                                    <i class="fas fa-user mr-1"></i>
+                                    <span>${lead.contactPerson || 'No contact'}</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                    <span>${lead.district || 'Unknown district'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            activityHTML += '</div>';
+            
+            recentActivity.innerHTML = activityHTML;
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            if (diffMins < 60) return `${diffMins} min${diffMins !== 1 ? 's' : ''} ago`;
+            else if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+            else return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const colors = {
+                info: 'bg-blue-500 text-white',
+                success: 'bg-green-500 text-white',
+                error: 'bg-red-500 text-white'
+            };
+            const toast = document.createElement('div');
+            toast.className = `${colors[type]} px-4 py-3 rounded-lg shadow-lg flex items-center justify-between`;
+            toast.innerHTML = `<div class="flex items-center"><i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-3"></i><span>${message}</span></div><button class="ml-4" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        // Initialize - analytics handled by analytics.js
+        // fetchLeads();
+    </script>
+</body>
+</html>

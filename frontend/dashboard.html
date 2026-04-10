@@ -1,0 +1,595 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | MapLeads CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+                            400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+                            800: '#1e40af', 900: '#1e3a8a',
+                        },
+                        gradient: {
+                            blue: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                            purple: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                            pink: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
+                            teal: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
+                            orange: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-in-out',
+                        'fade-out': 'fadeOut 0.3s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
+                        'slide-left': 'slideLeft 0.3s ease-out',
+                        'slide-right': 'slideRight 0.3s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite',
+                        'page-fade': 'pageFade 0.5s ease-out',
+                        'counter': 'counter 1s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        fadeOut: {
+                            '0%': { opacity: '1' },
+                            '100%': { opacity: '0' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        slideDown: {
+                            '0%': { transform: 'translateY(-10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        slideLeft: {
+                            '0%': { transform: 'translateX(10px)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        },
+                        slideRight: {
+                            '0%': { transform: 'translateX(-10px)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        glow: {
+                            '0%, 100%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.5)' },
+                            '50%': { boxShadow: '0 0 30px rgba(59, 130, 246, 0.8)' },
+                        },
+                        pageFade: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        counter: {
+                            '0%': { opacity: '0', transform: 'scale(0.8)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        },
+                    },
+                    boxShadow: {
+                        'premium': '0 20px 40px -15px rgba(0, 0, 0, 0.2), 0 10px 20px -10px rgba(0, 0, 0, 0.1)',
+                        'glass': '0 8px 32px rgba(31, 38, 135, 0.37)',
+                        'float': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                        'inner-glow': 'inset 0 2px 4px 0 rgba(255, 255, 255, 0.1)',
+                    },
+                    backdropBlur: {
+                        xs: '2px',
+                        sm: '4px',
+                        md: '8px',
+                        lg: '12px',
+                        xl: '20px',
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            animation: page-fade 0.5s ease-out;
+        }
+        .glassmorphism { 
+            background: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .dark .glassmorphism { 
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .gradient-border {
+            position: relative;
+            border-radius: 1.5rem;
+        }
+        .gradient-border::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            border-radius: 1.6rem;
+            z-index: -1;
+            opacity: 0.7;
+        }
+        .gradient-border-light::before {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3), rgba(236, 72, 153, 0.3));
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .sidebar-glow {
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.15);
+        }
+        .active-sidebar-item {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border-left: 4px solid #3b82f6;
+        }
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.2);
+        }
+        .counter-animation {
+            animation: counter 1s ease-out;
+        }
+        .page-header-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+        .empty-state-gradient {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        .dark .empty-state-gradient {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+
+        /* Custom CSS Animations */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-border {
+            position: relative;
+            background: linear-gradient(white, white) padding-box,
+                        linear-gradient(135deg, #667eea, #764ba2) border-box;
+            border: 2px solid transparent;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .glow {
+            box-shadow: 0 0 20px rgba(99,102,241,0.5);
+        }
+
+        .transition-all-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Improved KPI Cards Styling */
+        .sparkline-placeholder {
+            position: relative;
+            overflow: hidden;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .dark .sparkline-placeholder {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .sparkline-line {
+            animation: sparkline-grow 1.2s ease-out;
+            transform-origin: left;
+        }
+        @keyframes sparkline-grow {
+            0% { transform: scaleX(0); opacity: 0.5; }
+            100% { transform: scaleX(1); opacity: 1; }
+        }
+        
+        /* Enhanced hover effects for KPI cards */
+        .kpi-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .kpi-card-hover:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 20px rgba(59, 130, 246, 0.1);
+        }
+        .dark .kpi-card-hover:hover {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+        
+        /* Trend indicator styling */
+        .trend-up {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+        }
+        .trend-down {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white;
+        }
+        .trend-neutral {
+            background: linear-gradient(135deg, #6b7280, #9ca3af);
+            color: white;
+        }
+    </style>
+    <script>
+        // Initialize dark mode BEFORE page renders
+        (function() {
+            const html = document.documentElement;
+            const savedTheme = localStorage.getItem('darkMode');
+            
+            if (savedTheme === 'true' || (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+            }
+        })();
+        
+        // Animate counters
+        function animateCounter(element, target) {
+            let current = 0;
+            const increment = target / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    element.textContent = target.toLocaleString();
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current).toLocaleString();
+                }
+            }, 30);
+        }
+        
+        // Initialize counters on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate KPI counters
+            const counters = document.querySelectorAll('[data-counter]');
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-counter'));
+                animateCounter(counter, target);
+            });
+        });
+    </script>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 min-h-screen transition-all duration-500">
+    
+    <!-- Premium Header -->
+    <header class="sticky top-0 z-50 bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md border-b border-white/20 dark:border-secondary-700/50 shadow-soft">
+        <div class="flex items-center justify-between px-6 py-4">
+            <div class="flex items-center space-x-4">
+                <button id="sidebar-toggle-mobile" class="lg:hidden p-3 rounded-2xl hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all duration-300 hover-lift">
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
+                <div class="flex items-center">
+                    <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg">
+                        <i class="fas fa-map-marker-alt text-white text-lg"></i>
+                    </div>
+                    <span class="ml-3 text-2xl font-black tracking-tight bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">MapLeads</span>
+                    <span class="ml-2 text-sm font-bold bg-gradient-to-r from-primary-600 to-purple-600 text-white px-3 py-1 rounded-full">CRM</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="dark-mode-toggle" class="p-3 rounded-2xl hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all duration-300 hover-lift group">
+                    <i id="dark-mode-icon" class="fas fa-moon text-xl text-gray-600 dark:text-gray-300 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors"></i>
+                </button>
+                <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center shadow-md hover-lift transition-all duration-300 cursor-pointer ring-2 ring-primary-500/50 hover:ring-primary-500">
+                    <i class="fas fa-user text-primary-600 dark:text-primary-400 text-lg"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex h-[calc(100vh-5rem)]">
+        <!-- Premium Sidebar -->
+        <aside id="sidebar" class="hidden lg:flex flex-col bg-white/80 dark:bg-slate-900 backdrop-blur-md border-r border-gray-200/50 dark:border-slate-800 w-72 transition-all duration-500 shadow-sidebar">
+            <nav class="flex-1 px-4 py-8 space-y-2">
+                <a href="dashboard.html" class="flex items-center px-5 py-4 text-sm font-semibold rounded-2xl bg-gradient-to-r from-primary-50 to-transparent dark:from-primary-900/20 border-l-4 border-primary-500 text-primary-700 dark:text-primary-300 hover-lift group transition-all duration-300">
+                    <i class="fas fa-tachometer-alt w-5 mr-3 text-lg group-hover:scale-110 transition-transform"></i>Dashboard
+                    <span class="ml-auto bg-primary-500/20 text-primary-600 dark:text-primary-400 text-xs font-bold px-2 py-1 rounded-full">Active</span>
+                </a>
+                <a href="leads.html" class="flex items-center px-5 py-4 text-sm font-semibold rounded-2xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 hover-lift group transition-all duration-200">
+                    <i class="fas fa-users w-5 mr-3 text-lg group-hover:scale-110 transition-transform"></i>Leads
+                </a>
+                <a href="map-finder.html" class="flex items-center px-5 py-4 text-sm font-semibold rounded-2xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 hover-lift group transition-all duration-200">
+                    <i class="fas fa-map-pin w-5 mr-3 text-lg group-hover:scale-110 transition-transform"></i>Map Finder
+                </a>
+                <a href="kanban.html" class="flex items-center px-5 py-4 text-sm font-semibold rounded-2xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 hover-lift group transition-all duration-200">
+                    <i class="fas fa-columns w-5 mr-3 text-lg group-hover:scale-110 transition-transform"></i>Kanban
+                </a>
+                <a href="analytics.html" class="flex items-center px-5 py-4 text-sm font-semibold rounded-2xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 hover-lift group transition-all duration-200">
+                    <i class="fas fa-chart-line w-5 mr-3 text-lg group-hover:scale-110 transition-transform"></i>Analytics
+                </a>
+                <a href="settings.html" class="flex items-center px-5 py-4 text-sm font-semibold rounded-2xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 hover-lift group transition-all duration-200">
+                    <i class="fas fa-cog w-5 mr-3 text-lg group-hover:scale-110 transition-transform"></i>Settings
+                </a>
+            </nav>
+            <div class="p-6 border-t border-gray-200/50 dark:border-slate-800">
+                <button id="sidebar-toggle-desktop" class="w-full flex items-center justify-center p-3 rounded-2xl text-gray-600 dark:text-slate-200 hover:bg-gray-100/50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 hover-lift transition-all duration-300">
+                    <i class="fas fa-chevron-left"></i><span class="ml-2 text-sm font-medium">Collapse</span>
+                </button>
+            </div>
+        </aside>
+
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden hidden"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-6 md:p-8 animate-page-fade">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-8 animate-fade-in">
+                    <div class="bg-gradient-to-r from-primary-600 to-purple-600 rounded-3xl p-8 shadow-card-premium">
+                        <h1 class="text-4xl font-bold text-white mb-2 drop-shadow-lg">
+                            Welcome back! 👋
+                        </h1>
+                        <p class="text-primary-100 text-lg">
+                            Here's an overview of your CRM performance today.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Premium Glassmorphism KPI Cards - IMPROVED -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Card 1: Total Leads -->
+                    <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-white/50 dark:border-gray-700/50 animate-fade-in group">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">
+                                        Total Leads
+                                    </p>
+                                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                                        <i class="fas fa-users text-white text-xl"></i>
+                                    </div>
+                                </div>
+                                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                                    1,248
+                                </h3>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-semibold px-2 py-1 rounded-full flex items-center">
+                                            <i class="fas fa-arrow-up mr-1 text-xs"></i>
+                                            +12.5%
+                                        </div>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">from last month</span>
+                                    </div>
+                                    <div class="sparkline-placeholder w-16 h-8">
+                                        <div class="sparkline-line" style="height: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa); border-radius: 4px; width: 100%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Conversion Rate -->
+                    <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-white/50 dark:border-gray-700/50 animate-fade-in group" style="animation-delay: 0.1s">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">
+                                        Conversion Rate
+                                    </p>
+                                    <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                                        <i class="fas fa-chart-line text-white text-xl"></i>
+                                    </div>
+                                </div>
+                                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                                    24.8%
+                                </h3>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-semibold px-2 py-1 rounded-full flex items-center">
+                                            <i class="fas fa-arrow-up mr-1 text-xs"></i>
+                                            +3.2%
+                                        </div>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">from last month</span>
+                                    </div>
+                                    <div class="sparkline-placeholder w-16 h-8">
+                                        <div class="sparkline-line" style="height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 4px; width: 100%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Active Deals -->
+                    <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-white/50 dark:border-gray-700/50 animate-fade-in group" style="animation-delay: 0.2s">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">
+                                        Active Deals
+                                    </p>
+                                    <div class="bg-gradient-to-br from-amber-500 to-amber-600 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                                        <i class="fas fa-handshake text-white text-xl"></i>
+                                    </div>
+                                </div>
+                                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                                    48
+                                </h3>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 text-xs font-semibold px-2 py-1 rounded-full flex items-center">
+                                            <i class="fas fa-arrow-down mr-1 text-xs"></i>
+                                            -2
+                                        </div>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">from last week</span>
+                                    </div>
+                                    <div class="sparkline-placeholder w-16 h-8">
+                                        <div class="sparkline-line" style="height: 70%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 4px; width: 100%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Revenue -->
+                    <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-white/50 dark:border-gray-700/50 animate-fade-in group" style="animation-delay: 0.3s">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">
+                                        Revenue
+                                    </p>
+                                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                                        <i class="fas fa-dollar-sign text-white text-xl"></i>
+                                    </div>
+                                </div>
+                                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                                    $24.5K
+                                </h3>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-semibold px-2 py-1 rounded-full flex items-center">
+                                            <i class="fas fa-arrow-up mr-1 text-xs"></i>
+                                            +18.7%
+                                        </div>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">from last month</span>
+                                    </div>
+                                    <div class="sparkline-placeholder w-16 h-8">
+                                        <div class="sparkline-line" style="height: 100%; background: linear-gradient(90deg, #8b5cf6, #a78bfa); border-radius: 4px; width: 100%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Section -->
+                <div class="glass-card dark:bg-secondary-800 rounded-2xl p-6 shadow-card-premium mb-8 animate-fade-in">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-secondary-900 dark:text-white">
+                                Recent Activity
+                            </h2>
+                            <p class="text-sm text-secondary-600 dark:text-secondary-400">
+                                Latest updates from your team
+                            </p>
+                        </div>
+                        <a href="#" class="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 text-sm font-medium flex items-center">
+                            View All
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Activity 1 -->
+                        <div class="flex items-start p-4 rounded-xl bg-secondary-50 dark:bg-secondary-900/50 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-primary-700 to-primary-900 flex items-center justify-center text-white mr-4">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <p class="font-medium text-secondary-900 dark:text-white">
+                                        New lead added
+                                    </p>
+                                    <span class="text-xs text-secondary-500 dark:text-secondary-400">
+                                        10 min ago
+                                    </span>
+                                </div>
+                                <p class="text-sm text-secondary-600 dark:text-secondary-400 mt-1">
+                                    John Doe from TechCorp added by Alex Johnson
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Activity 2 -->
+                        <div class="flex items-start p-4 rounded-xl bg-secondary-50 dark:bg-secondary-900/50 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-green-700 to-green-900 flex items-center justify-center text-white mr-4">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <p class="font-medium text-secondary-900 dark:text-white">
+                                        Deal closed
+                                    </p>
+                                    <span class="text-xs text-secondary-500 dark:text-secondary-400">
+                                        1 hour ago
+                                    </span>
+                                </div>
+                                <p class="text-sm text-secondary-600 dark:text-secondary-400 mt-1">
+                                    $12,500 deal with Global Solutions marked as won
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Activity 3 -->
+                        <div class="flex items-start p-4 rounded-xl bg-secondary-50 dark:bg-secondary-900/50 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-yellow-700 to-yellow-900 flex items-center justify-center text-white mr-4">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <p class="font-medium text-secondary-900 dark:text-white">
+                                        Meeting scheduled
+                                    </p>
+                                    <span class="text-xs text-secondary-500 dark:text-secondary-400">
+                                        2 hours ago
+                                    </span>
+                                </div>
+                                <p class="text-sm text-secondary-600 dark:text-secondary-400 mt-1">
+                                    Follow-up meeting with Sarah Miller at 3:00 PM tomorrow
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Activity 4 -->
+                        <div class="flex items-start p-4 rounded-xl bg-secondary-50 dark:bg-secondary-900/50 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-purple-700 to-purple-900 flex items-center justify-center text-white mr-4">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <p class="font-medium text-secondary-900 dark:text-white">
+                                        Invoice sent
+                                    </p>
+                                    <span class="text-xs text-secondary-500 dark:text-secondary-400">
+                                        5 hours ago
+                                    </span>
+                                </div>
+                                <p class="text-sm text-secondary-600 dark:text-secondary-400 mt-1">
+                                    Invoice #INV-2024-089 sent to Marketing Pro Ltd.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Floating WhatsApp Button -->
+                <a href="https://wa.me/919876543210?text=Hi%20I%20need%20help%20with%20MapLeads%20CRM"
+                   target="_blank"
+                   class="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-2xl shadow-green-500/30 hover:shadow-green-500/50 hover:scale-110 transition-all duration-300 animate-pulse-slow">
+                    <i class="fab fa-whatsapp text-white text-2xl"></i>
+                </a>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,65 @@
+{
+  "name": "mapleads-crm",
+  "version": "1.0.0",
+  "description": "Production-ready full stack CRM SaaS for lead management and analytics",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "nodemon backend/server.js",
+    "dev:frontend": "tailwindcss -i ./frontend/assets/css/input.css -o ./frontend/assets/css/style.css --watch",
+    "build:css": "tailwindcss -i ./frontend/assets/css/input.css -o ./frontend/assets/css/style.css --minify",
+    "build": "npm run build:css",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint backend/ --ext .js",
+    "format": "prettier --write \"backend/**/*.js\" \"frontend/**/*.js\"",
+    "docker:build": "docker build -t mapleads-crm .",
+    "docker:run": "docker run -p 5000:5000 --env-file .env mapleads-crm",
+    "docker:compose": "docker-compose up",
+    "seed": "node backend/scripts/seed.js",
+    "clean": "rm -rf node_modules package-lock.json && npm install"
+  },
+  "keywords": [
+    "crm",
+    "saas",
+    "dashboard",
+    "express",
+    "mongodb",
+    "tailwind",
+    "lead-management",
+    "analytics"
+  ],
+  "author": "MapLeads Team",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.0",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.4.1",
+    "morgan": "^1.10.1",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.9",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/mapleads-crm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/mapleads-crm/issues"
+  },
+  "homepage": "https://github.com/your-org/mapleads-crm#readme"
+}
