@@ -1,0 +1,83 @@
+# Payment API Test Requests
+# Use with REST Client extension in VSCode or with curl
+
+@baseUrl = http://localhost:5000
+@apiVersion = v1
+
+### Get API Root
+GET {{baseUrl}}/api/{{apiVersion}}
+
+### Get All Payments (with pagination)
+GET {{baseUrl}}/api/{{apiVersion}}/payments
+Content-Type: application/json
+
+### Get All Payments with Filters
+GET {{baseUrl}}/api/{{apiVersion}}/payments?status=partial&clientName=ABC&page=1&limit=5
+Content-Type: application/json
+
+### Get Payment Statistics
+GET {{baseUrl}}/api/{{apiVersion}}/payments/stats/summary
+Content-Type: application/json
+
+### Create a New Payment
+POST {{baseUrl}}/api/{{apiVersion}}/payments
+Content-Type: application/json
+
+{
+  "clientName": "Global Tech Solutions",
+  "projectName": "E-commerce Platform",
+  "dealAmount": 75000,
+  "receivedAmount": 25000,
+  "paymentDate": "2026-04-10",
+  "paymentMethod": "bank_transfer",
+  "nextDueDate": "2026-05-10",
+  "status": "partial",
+  "notes": "First installment received"
+}
+
+### Create Another Payment
+POST {{baseUrl}}/api/{{apiVersion}}/payments
+Content-Type: application/json
+
+{
+  "clientName": "Sunrise Marketing",
+  "projectName": "Social Media Campaign",
+  "dealAmount": 30000,
+  "receivedAmount": 30000,
+  "paymentDate": "2026-04-05",
+  "paymentMethod": "upi",
+  "nextDueDate": null,
+  "status": "completed",
+  "notes": "Full payment received upfront"
+}
+
+### Get Payment by ID (replace {id} with actual payment ID)
+GET {{baseUrl}}/api/{{apiVersion}}/payments/{id}
+Content-Type: application/json
+
+### Update Payment (replace {id} with actual payment ID)
+PUT {{baseUrl}}/api/{{apiVersion}}/payments/{id}
+Content-Type: application/json
+
+{
+  "receivedAmount": 50000,
+  "status": "partial",
+  "notes": "Updated received amount"
+}
+
+### Delete Payment (soft delete - replace {id} with actual payment ID)
+DELETE {{baseUrl}}/api/{{apiVersion}}/payments/{id}
+Content-Type: application/json
+
+### Test Auto Calculation of Pending Amount
+POST {{baseUrl}}/api/{{apiVersion}}/payments
+Content-Type: application/json
+
+{
+  "clientName": "Test Client",
+  "projectName": "Test Project",
+  "dealAmount": 100000,
+  "receivedAmount": 40000,
+  "paymentMethod": "cash",
+  "notes": "Testing auto calculation of pending amount"
+}

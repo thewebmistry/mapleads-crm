@@ -190,6 +190,9 @@
                 <a href="analytics.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
                     <i class="fas fa-chart-line w-5 mr-3 group-hover:scale-110 transition-transform"></i>Analytics
                 </a>
+                <a href="payments.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-credit-card w-5 mr-3 group-hover:scale-110 transition-transform"></i>Payments
+                </a>
                 <a href="settings.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
                     <i class="fas fa-cog w-5 mr-3 group-hover:scale-110 transition-transform"></i>Settings
                 </a>
@@ -730,11 +733,10 @@
                 if (loadingRow) loadingRow.remove();
 
                 // Show error toast
-                showToast('Failed to load leads. Using sample data.', 'error');
+                showToast('Failed to load leads. Please check your connection.', 'error');
                 
-                // Render fallback data (api.getLeads() already provides fallback)
-                const leads = await window.api.getLeads();
-                renderLeads(leads);
+                // Render empty leads (no fallback data)
+                renderLeads([]);
             }
         }
 

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payments | MapLeads CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+                            400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+                            800: '#1e40af', 900: '#1e3a8a',
+                        },
+                        secondary: {
+                            50: '#f9fafb', 100: '#f3f4f6', 200: '#e5e7eb', 300: '#d1d5db',
+                            400: '#9ca3af', 500: '#6b7280', 600: '#4b5563', 700: '#374151',
+                            800: '#1f2937', 900: '#111827',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .dark .glassmorphism {
+            background: rgba(30, 41, 59, 0.7);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Payment status badges */
+        .status-paid { background: linear-gradient(90deg, #10b981, #34d399); }
+        .status-partial { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .status-due { background: linear-gradient(90deg, #ef4444, #f87171); }
+        .status-overdue { background: linear-gradient(90deg, #dc2626, #ef4444); }
+        
+        /* District colors (matching leads page) */
+        .district-ranchi { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .district-gumla { background: linear-gradient(90deg, #10b981, #34d399); }
+        .district-lohardaga { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        .district-khunti { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .district-simdega { background: linear-gradient(90deg, #ec4899, #f472b6); }
+
+        /* Premium UI enhancements */
+        .shadow-soft {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        }
+        .dark .shadow-soft {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+        }
+        .shadow-card-premium {
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        .dark .shadow-card-premium {
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .focus-gradient-ring:focus {
+            outline: none;
+            border-color: transparent;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5), 0 0 0 6px rgba(139, 92, 246, 0.3);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            transition: transform 0.2s ease;
+        }
+        .glass-container {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .dark .glass-container {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Custom CSS Animations */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-border {
+            position: relative;
+            background: linear-gradient(white, white) padding-box,
+                        linear-gradient(135deg, #667eea, #764ba2) border-box;
+            border: 2px solid transparent;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .glow {
+            box-shadow: 0 0 20px rgba(99,102,241,0.5);
+        }
+
+        .transition-all-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Payment-specific styles */
+        .amount-positive { color: #10b981; }
+        .amount-negative { color: #ef4444; }
+        .amount-pending { color: #f59e0b; }
+        
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: #e5e7eb;
+        }
+        .dark .progress-bar {
+            background-color: #374151;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        }
+        
+    </style>
+    <script>
+        // Initialize dark mode BEFORE page renders
+        (function() {
+            const html = document.documentElement;
+            const savedTheme = localStorage.getItem('darkMode');
+            
+            if (savedTheme === 'true' || (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+            }
+        })();
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
+    
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md border-b border-white/20 dark:border-secondary-700/50 shadow-soft">
+        <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center space-x-4">
+                <button id="sidebar-toggle-mobile" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="flex items-center">
+                    <div class="h-8 w-8 rounded-lg bg-primary-600 flex items-center justify-center">
+                        <i class="fas fa-map-marker-alt text-white"></i>
+                    </div>
+                    <span class="ml-3 text-xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">MapLeads</span>
+                    <span class="ml-1 text-sm font-medium text-primary-600 dark:text-primary-400">CRM</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="dark-mode-toggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <i id="dark-mode-icon" class="fas fa-moon"></i>
+                </button>
+                <div class="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center ring-2 ring-primary-500/50 hover:ring-primary-500 transition-all duration-300">
+                    <i class="fas fa-user text-primary-600 dark:text-primary-400"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex h-[calc(100vh-4rem)]">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="hidden lg:flex flex-col bg-white/80 dark:bg-slate-900 backdrop-blur-md border-r border-gray-200/50 dark:border-slate-800 w-64 transition-all duration-300 shadow-sidebar">
+            <nav class="flex-1 px-4 py-6 space-y-1">
+                <a href="dashboard.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-tachometer-alt w-5 mr-3 group-hover:scale-110 transition-transform"></i>Dashboard
+                </a>
+                <a href="leads.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-users w-5 mr-3 group-hover:scale-110 transition-transform"></i>Leads
+                </a>
+                <a href="map-finder.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-map-pin w-5 mr-3 group-hover:scale-110 transition-transform"></i>Map Finder
+                </a>
+                <a href="kanban.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-columns w-5 mr-3 group-hover:scale-110 transition-transform"></i>Kanban
+                </a>
+                <a href="analytics.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-chart-line w-5 mr-3 group-hover:scale-110 transition-transform"></i>Analytics
+                </a>
+                <a href="payments.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-gradient-to-r from-primary-50 to-transparent dark:from-primary-900/20 border-l-4 border-primary-500 text-primary-700 dark:text-primary-300">
+                    <i class="fas fa-credit-card w-5 mr-3"></i>Payments
+                </a>
+                <a href="settings.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group">
+                    <i class="fas fa-cog w-5 mr-3 group-hover:scale-110 transition-transform"></i>Settings
+                </a>
+            </nav>
+            <div class="p-4 border-t border-gray-200 dark:border-slate-800">
+                <button id="sidebar-toggle-desktop" class="w-full flex items-center justify-center p-2 rounded-lg text-gray-600 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200">
+                    <i class="fas fa-chevron-left"></i><span class="ml-2 text-sm">Collapse</span>
+                </button>
+            </div>
+        </aside>
+
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 dark:bg-gray-900">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-8">
+                    <h1 class="text-2xl md:text-3xl font-bold">Payments Management</h1>
+                    <p class="text-gray-600 dark:text-gray-400 mt-1">Track client deal amount and payment history</p>
+                </div>
+
+                <!-- Premium Filter Bar -->
+                <div class="bg-gradient-to-br from-white/90 to-white/70 dark:from-secondary-800/90 dark:to-secondary-900/70 backdrop-blur-xl rounded-2xl shadow-soft border border-secondary-200/50 p-5 mb-6">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                        <!-- LEFT SECTION: Search and District -->
+                        <div class="flex flex-col sm:flex-row gap-4 flex-1 lg:flex-none lg:max-w-2xl">
+                            <div class="relative flex-1 sm:flex-none sm:w-64">
+                                <i class="fas fa-search absolute left-4 top-3.5 text-primary-500"></i>
+                                <input type="text" id="search-client" placeholder="Search client..." class="w-full pl-12 pr-4 py-3 border border-secondary-300 dark:border-secondary-600 rounded-xl bg-white/95 dark:bg-secondary-900/95 focus-gradient-ring focus:border-transparent transition-all duration-300">
+                            </div>
+                            <div class="flex-1 sm:flex-none sm:w-48">
+                                <select id="district-filter" class="w-full px-4 py-3 border border-secondary-300 dark:border-secondary-600 rounded-xl bg-white/95 dark:bg-secondary-900/95 focus-gradient-ring focus:border-transparent transition-all duration-300">
+                                    <option value="">All Districts</option>
+                                    <option>Ranchi</option>
+                                    <option>Gumla</option>
+                                    <option>Lohardaga</option>
+                                    <option>Khunti</option>
+                                    <option>Simdega</option>
+                                </select>
+                            </div>
+                            <div class="flex-1 sm:flex-none sm:w-48">
+                                <select id="payment-status-filter" class="w-full px-4 py-3 border border-secondary-300 dark:border-secondary-600 rounded-xl bg-white/95 dark:bg-secondary-900/95 focus-gradient-ring focus:border-transparent transition-all duration-300">
+                                    <option value="">All Status</option>
+                                    <option>Paid</option>
+                                    <option>Partial</option>
+                                    <option>Due</option>
+                                    <option>Overdue</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT SECTION: Add Payment Button -->
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-wrap lg:flex-nowrap">
+                            <button id="add-payment-btn" class="px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-lg flex items-center shadow-lg shadow-blue-500/30 hover-lift transition-all duration-300">
+                                <i class="fas fa-plus mr-2"></i> Add Payment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Premium Data Table -->
+                <div class="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-xl rounded-2xl shadow-card-premium border border-secondary-200/50 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gradient-to-r from-primary-50 to-purple-50 dark:from-primary-900/40 dark:to-purple-900/40 border-b border-secondary-200/50">
+                                <tr>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-secondary-800 dark:text-secondary-200">Client</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-secondary-800 dark:text-secondary-200">Project</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-secondary-800 dark:text-secondary-200">Deal Amount</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-secondary-800 dark:text-secondary-200">Received</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-secondary-800 dark:text-secondary-200">Pending</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-secondary-800 dark:text-secondary-200">Due Date</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-secondary-800 dark:text-secondary-200">Status</th>
+                                    <th class="py-4 px-6 text-left text-sm font-semibold text-secondary-800 dark:text-secondary-200">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payments-table-body" class="divide-y divide-secondary-200/50">
+                                <!-- Payments will be dynamically inserted here -->
+                                <!-- Empty state row (hidden when data exists) -->
+                                <tr id="empty-state-row" class="hidden">
+                                    <td colspan="8" class="py-12 text-center">
+                                        <div class="animate-fade-in">
+                                            <i class="fas fa-credit-card text-5xl mb-4 text-gradient bg-gradient-to-r from-primary-500 to-purple-500 bg-clip-text text-transparent"></i>
+                                            <p class="text-xl font-semibold text-secondary-800 dark:text-secondary-200">No payment records found</p>
+                                            <p class="text-sm text-secondary-600 dark:text-secondary-400 mt-2">Add your first payment using the "Add Payment" button</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript for sidebar toggle and dark mode -->
+    <script>
+        // Sidebar toggle for mobile
+        document.getElementById('sidebar-toggle-mobile').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('hidden');
+            overlay.classList.toggle('hidden');
+            sidebar.classList.add('lg:flex');
+        });
+
+        // Sidebar toggle for desktop collapse
+        document.getElementById('sidebar-toggle-desktop').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const icon = this.querySelector('i');
+            const text = this.querySelector('span');
+            
+            if (sidebar.classList.contains('w-64')) {
+                sidebar.classList.remove('w-64');
+                sidebar.classList.add('w-20');
+                icon.classList.remove('fa-chevron-left');
+                icon.classList.add('fa-chevron-right');
+                text.textContent = 'Expand';
+            } else {
+                sidebar.classList.remove('w-20');
+                sidebar.classList.add('w-64');
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-left');
+                text.textContent = 'Collapse';
+            }
+        });
+
+        // Close sidebar on overlay click (mobile)
+        document.getElementById('sidebar-overlay').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.add('hidden');
+            this.classList.add('hidden');
+        });
+
+        // Dark mode toggle
+        document.getElementById('dark-mode-toggle').addEventListener('click', function() {
+            const html = document.documentElement;
+            const icon = document.getElementById('dark-mode-icon');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('darkMode', 'false');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('darkMode', 'true');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        });

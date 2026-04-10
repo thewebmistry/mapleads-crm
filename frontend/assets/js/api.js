@@ -17,6 +17,8 @@
     // Helper function for fetch requests with production error handling
     const apiRequest = async (endpoint, options = {}) => {
         const url = `${BASE_URL}${endpoint}`;
+        console.log(`API Request: ${url}`, { endpoint, options });
+        
         const headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -27,27 +29,47 @@
         const token = localStorage.getItem('token');
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
+        // Default fetch options with credentials for CORS
+        const fetchOptions = {
+            ...options,
+            headers,
+            credentials: 'include', // Include cookies for CORS
+            mode: 'cors' // Ensure CORS mode
+        };
+
         try {
-            const response = await fetch(url, { ...options, headers });
+            const response = await fetch(url, fetchOptions);
+            console.log(`API Response: ${response.status} ${response.statusText}`, { url });
             
             // Handle non-2xx responses
             if (!response.ok) {
+                let errorBody = '';
+                try {
+                    errorBody = await response.text();
+                } catch (e) {
+                    // ignore
+                }
                 console.error(`API request failed: ${response.status} ${response.statusText}`, {
                     endpoint,
                     status: response.status,
-                    statusText: response.statusText
+                    statusText: response.statusText,
+                    url,
+                    body: errorBody
                 });
                 
                 const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
                 error.status = response.status;
                 error.isApiError = true;
+                error.body = errorBody;
                 throw error;
             }
             
-            return await response.json();
+            const data = await response.json();
+            console.log(`API Success: ${url}`, { dataCount: Array.isArray(data) ? data.length : 'object' });
+            return data;
         } catch (error) {
             // Network errors, CORS issues, etc.
-            console.error('API request failed:', error.message);
+            console.error('API request failed:', error.message, error);
             
             // Show toast notification for user feedback
             if (typeof window.showToast === 'function') {

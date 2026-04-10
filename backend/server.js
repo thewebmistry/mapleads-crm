@@ -57,6 +57,7 @@ const authRoutes = require('./routes/auth.routes');
 const leadRoutes = require('./routes/lead.routes');
 const reminderRoutes = require('./routes/reminder.routes');
 const scraperRoutes = require('./routes/scraper.routes');
+const paymentRoutes = require('./routes/payment.routes');
 
 // ======================
 // API Routes
@@ -77,6 +78,9 @@ app.use(`/api/${API_VERSION}/reminders`, reminderRoutes);
 // Scraper routes
 app.use(`/api/${API_VERSION}/scraper`, scraperRoutes);
 
+// Payment routes
+app.use(`/api/${API_VERSION}/payments`, paymentRoutes);
+
 // API root
 app.get(`/api/${API_VERSION}`, (req, res) => {
   res.json({
@@ -95,6 +99,8 @@ app.get(`/api/${API_VERSION}`, (req, res) => {
       reminders: `/api/${API_VERSION}/reminders`,
       scraper: `/api/${API_VERSION}/scraper`,
       'scraper-maps-search': `/api/${API_VERSION}/scraper/maps-search`,
+      payments: `/api/${API_VERSION}/payments`,
+      'payments-stats': `/api/${API_VERSION}/payments/stats/summary`,
       users: `/api/${API_VERSION}/users`,
     },
   });

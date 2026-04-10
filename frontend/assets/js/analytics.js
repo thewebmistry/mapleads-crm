@@ -55,25 +55,72 @@
     // Production API configuration
     const API_BASE = "https://mapleads-crm.onrender.com/api/v1";
     const STATS_ENDPOINT = `${API_BASE}/leads/stats/summary`;
+    const PAYMENT_STATS_ENDPOINT = `${API_BASE}/payments/stats/summary`;
+    const PAYMENTS_ENDPOINT = `${API_BASE}/payments`;
+    
+    // Fallback data for when API is unavailable
+    const FALLBACK_DATA = {
+        districts: {
+            'Central Delhi': 45,
+            'South Delhi': 38,
+            'North Delhi': 32,
+            'West Delhi': 28,
+            'East Delhi': 24,
+            'New Delhi': 18
+        },
+        pipeline: {
+            'New': 25,
+            'Contacted': 18,
+            'Qualified': 12,
+            'Proposal': 8,
+            'Negotiation': 5,
+            'Closed': 15
+        },
+        revenue: [125000, 98000, 145000, 110000, 165000, 132000],
+        sources: {
+            'Google Maps': 42,
+            'Referral': 28,
+            'Website': 19,
+            'Social Media': 11,
+            'Other': 8
+        },
+        closeRatio: [65, 72, 68, 75, 70, 78]
+    };
+    
     let currentData = {};
+    let paymentData = {};
 
     /**
      * Fetch real stats from production API
      */
     async function fetchRealStats() {
         showLoading(true);
+        console.log('Fetching stats from:', STATS_ENDPOINT);
         try {
+            const headers = {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            };
+            const token = localStorage.getItem('token');
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
             const response = await fetch(STATS_ENDPOINT, {
-                headers: {
-                    'Accept': 'application/json',
-                    // Add authentication token if needed
-                    'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
-                }
+                headers,
+                credentials: 'include',
+                mode: 'cors'
             });
+            console.log('Stats response:', response.status, response.statusText);
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+                let errorBody = '';
+                try {
+                    errorBody = await response.text();
+                } catch (e) {}
+                console.error('Stats API error:', response.status, errorBody);
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             const result = await response.json();
+            console.log('Stats API result:', result);
             if (result.success && result.data) {
                 console.log('Real stats loaded from production API', result.data);
                 currentData = result.data;
@@ -81,7 +128,7 @@
                 throw new Error('Invalid API response');
             }
         } catch (error) {
-            console.error('Failed to fetch real stats:', error.message);
+            console.error('Failed to fetch real stats:', error.message, error);
             // Show error to user
             if (typeof window.showToast === 'function') {
                 window.showToast('Failed to load analytics data', 'error');
@@ -91,6 +138,91 @@
         } finally {
             showLoading(false);
         }
+    }
+
+    /**
+     * Fetch payment statistics from API
+     */
+    async function fetchPaymentStats() {
+        console.log('Fetching payment stats from:', PAYMENT_STATS_ENDPOINT);
+        try {
+            const headers = {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            };
+            const token = localStorage.getItem('token');
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            const response = await fetch(PAYMENT_STATS_ENDPOINT, {
+                headers,
+                credentials: 'include',
+                mode: 'cors'
+            });
+            console.log('Payment stats response:', response.status, response.statusText);
+            if (!response.ok) {
+                let errorBody = '';
+                try {
+                    errorBody = await response.text();
+                } catch (e) {}
+                console.error('Payment stats API error:', response.status, errorBody);
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            const result = await response.json();
+            console.log('Payment stats API result:', result);
+            if (result.success && result.data) {
+                console.log('Payment stats loaded from API', result.data);
+                paymentData = result.data;
+                return result.data;
+            } else {
+                throw new Error('Invalid payment API response');
+            }
+        } catch (error) {
+            console.error('Failed to fetch payment stats:', error.message, error);
+            // Fallback to sample payment data
+            paymentData = getSamplePaymentData();
+            return paymentData;
+        }
+    }
+
+    /**
+     * Get sample payment data for fallback when API is unavailable
+     */
+    function getSamplePaymentData() {
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+        
+        // Generate sample monthly revenue for last 6 months
+        const monthlyRevenue = [];
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+        for (let i = 5; i >= 0; i--) {
+            const monthIndex = (currentMonth - i + 12) % 12;
+            const year = currentYear - (currentMonth - i < 0 ? 1 : 0);
+            monthlyRevenue.push(Math.floor(Math.random() * 500000) + 100000);
+        }
+        
+        return {
+            totalReceivedAmount: monthlyRevenue.reduce((a, b) => a + b, 0),
+            totalDealAmount: monthlyRevenue.reduce((a, b) => a + b, 0) * 1.2,
+            totalPendingAmount: monthlyRevenue.reduce((a, b) => a + b, 0) * 0.2,
+            monthlyRevenue: monthlyRevenue,
+            monthlyLabels: months,
+            recentPayments: [
+                {
+                    clientName: 'Sample Client 1',
+                    amount: 25000,
+                    date: new Date(Date.now() - 86400000).toISOString(),
+                    status: 'completed'
+                },
+                {
+                    clientName: 'Sample Client 2',
+                    amount: 15000,
+                    date: new Date(Date.now() - 172800000).toISOString(),
+                    status: 'partial'
+                }
+            ]
+        };
     }
 
     /**
@@ -111,6 +243,12 @@
         } else {
             // No data available
             console.warn('No analytics data available');
+        }
+
+        // Override revenue with payment data if available
+        if (paymentData && paymentData.totalReceivedAmount !== undefined) {
+            totalRevenue = paymentData.totalReceivedAmount;
+            console.log('Using payment data for revenue:', totalRevenue);
         }
 
         // Update stat cards
@@ -180,6 +318,9 @@
         
         // Try to fetch real stats from API first
         await fetchRealStats();
+        
+        // Fetch payment statistics for revenue data
+        await fetchPaymentStats();
         
         // Update metrics with real data (if available) or fallback
         updateMetrics();
@@ -429,13 +570,37 @@
     }
 
     /**
-     * Render revenue line chart
+     * Render revenue line chart with payment data
      */
     function renderRevenueChart() {
-        const revenueData = FALLBACK_DATA.revenue;
-        const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+        // Use payment data for monthly revenue trend if available
+        let revenueData, labels;
+        
+        if (paymentData && paymentData.monthlyRevenue && paymentData.monthlyRevenue.length > 0) {
+            revenueData = paymentData.monthlyRevenue;
+            labels = paymentData.monthlyLabels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            console.log('Using payment data for revenue chart:', revenueData);
+        } else if (typeof FALLBACK_DATA !== 'undefined' && FALLBACK_DATA.revenue) {
+            revenueData = FALLBACK_DATA.revenue;
+            labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            console.log('Using fallback data for revenue chart');
+        } else {
+            // Default sample data
+            revenueData = [120000, 190000, 150000, 180000, 220000, 250000];
+            labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            console.log('Using default sample data for revenue chart');
+        }
         
         const isDark = document.documentElement.classList.contains('dark');
+        
+        // Destroy existing chart instance to prevent duplicate rendering
+        if (chartInstances.revenueChart) {
+            try {
+                chartInstances.revenueChart.destroy();
+            } catch (e) {
+                console.warn('Error destroying revenue chart:', e);
+            }
+        }
         
         chartInstances.revenueChart = new Chart(elements.revenueLineChart, {
             type: 'line',
@@ -676,12 +841,13 @@
     }
 
     /**
-     * Render recent activity timeline with mock data
+     * Render recent activity timeline with mock data and payment activities
      */
     function renderRecentActivity() {
         if (!elements.recentActivity) return;
         
-        const activities = [
+        // Base activities
+        let activities = [
             {
                 icon: 'fas fa-user-plus',
                 color: 'bg-blue-500',
@@ -724,6 +890,38 @@
             }
         ];
 
+        // Add payment activities if available
+        if (paymentData && paymentData.recentPayments && paymentData.recentPayments.length > 0) {
+            console.log('Adding payment activities to recent activity');
+            
+            // Convert payment data to activity format and prepend to activities
+            const paymentActivities = paymentData.recentPayments.map(payment => {
+                const paymentDate = new Date(payment.date);
+                const timeAgo = getTimeAgo(paymentDate);
+                const amountFormatted = new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(payment.amount);
+                
+                return {
+                    icon: 'fas fa-money-bill-wave',
+                    color: 'bg-emerald-500',
+                    title: 'Payment received',
+                    description: `${amountFormatted} from ${payment.clientName}`,
+                    time: timeAgo,
+                    status: 'payment'
+                };
+            });
+            
+            // Add payment activities at the beginning (most recent first)
+            activities = [...paymentActivities, ...activities];
+            
+            // Limit to 6 activities total
+            activities = activities.slice(0, 6);
+        }
+
         let html = `
             <div class="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-indigo-300/50 to-purple-300/50 dark:from-indigo-500/30 dark:to-purple-500/30"></div>
             <div class="space-y-6">
@@ -748,6 +946,27 @@
 
         html += `</div>`;
         elements.recentActivity.innerHTML = html;
+    }
+
+    /**
+     * Helper function to format time ago
+     */
+    function getTimeAgo(date) {
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        
+        if (diffMins < 60) {
+            return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+        } else if (diffHours < 24) {
+            return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+        } else if (diffDays < 7) {
+            return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+        } else {
+            return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+        }
     }
 
     /**
