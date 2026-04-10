@@ -214,8 +214,13 @@
                 // Remove hidden class and add mobile-specific classes
                 AppUtils.removeClass(sidebar, 'hidden');
                 AppUtils.addClass(sidebar, 'fixed', 'inset-y-0', 'left-0', 'z-50', 'lg:hidden');
-                // Ensure it's visible on mobile
-                AppUtils.removeClass(sidebar, 'lg:flex');
+                // Start off-screen
+                AppUtils.addClass(sidebar, '-translate-x-full');
+                // Force reflow to ensure transition works
+                sidebar.offsetHeight;
+                // Then slide in
+                AppUtils.removeClass(sidebar, '-translate-x-full');
+                AppUtils.addClass(sidebar, 'translate-x-0');
             }
             if (backdrop) {
                 AppUtils.removeClass(backdrop, 'hidden');
@@ -229,11 +234,16 @@
             const sidebar = AppUtils.getElement(this.SIDEBAR_ID);
             const backdrop = AppUtils.getElement(this.BACKDROP_ID);
             if (sidebar) {
-                // Add hidden class and remove mobile-specific classes
-                AppUtils.addClass(sidebar, 'hidden');
-                AppUtils.removeClass(sidebar, 'fixed', 'inset-y-0', 'left-0', 'z-50', 'lg:hidden');
-                // Restore desktop classes
-                AppUtils.addClass(sidebar, 'lg:flex');
+                // Move off-screen first
+                AppUtils.removeClass(sidebar, 'translate-x-0');
+                AppUtils.addClass(sidebar, '-translate-x-full');
+                // After transition, hide it and remove mobile classes
+                setTimeout(() => {
+                    if (AppUtils.hasClass(sidebar, '-translate-x-full')) {
+                        AppUtils.addClass(sidebar, 'hidden');
+                        AppUtils.removeClass(sidebar, 'fixed', 'inset-y-0', 'left-0', 'z-50', 'lg:hidden', '-translate-x-full');
+                    }
+                }, 300); // Match transition duration
             }
             if (backdrop) {
                 AppUtils.addClass(backdrop, 'hidden');
@@ -245,10 +255,16 @@
          */
         toggle: function() {
             const sidebar = AppUtils.getElement(this.SIDEBAR_ID);
-            if (sidebar && AppUtils.hasClass(sidebar, 'hidden')) {
-                this.open();
-            } else {
+            if (!sidebar) return;
+            
+            // Check if sidebar is currently open (visible on mobile)
+            const isOpen = AppUtils.hasClass(sidebar, 'translate-x-0') &&
+                          !AppUtils.hasClass(sidebar, 'hidden');
+            
+            if (isOpen) {
                 this.close();
+            } else {
+                this.open();
             }
         },
 
@@ -283,7 +299,7 @@
                 const menuBtn = AppUtils.getElement(this.MENU_BUTTON_ID);
                 if (sidebar && !sidebar.contains(e.target) &&
                     menuBtn && !menuBtn.contains(e.target) &&
-                    !AppUtils.hasClass(sidebar, 'hidden') &&
+                    AppUtils.hasClass(sidebar, 'translate-x-0') &&
                     window.innerWidth < 1024) {
                     this.close();
                 }

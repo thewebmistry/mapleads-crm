@@ -113,6 +113,12 @@
             body: JSON.stringify(data)
         }),
 
+        // Generic POST helper for scraper APIs
+        post: (endpoint, payload) => apiRequest(endpoint, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        }),
+
         // PUT /api/v1/leads/:id
         updateLead: (id, data) => apiRequest(`/leads/${id}`, {
             method: 'PUT',

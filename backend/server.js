@@ -23,12 +23,44 @@ const API_VERSION = process.env.API_VERSION || 'v1';
 app.use(helmet());
 
 // CORS configuration
+const allowedOrigins = [
+  // Production frontend
+  'https://mapleads-frontend.onrender.com',
+  // Development origins
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+  'null'
+];
+
+// Add CLIENT_URL from environment if provided
+if (process.env.CLIENT_URL) {
+  const clientUrls = process.env.CLIENT_URL.split(',').map(url => url.trim());
+  clientUrls.forEach(url => {
+    if (!allowedOrigins.includes(url)) {
+      allowedOrigins.push(url);
+    }
+  });
+}
+
 const corsOptions = {
-  origin: NODE_ENV === 'development'
-    ? ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5500', 'null']
-    : process.env.CLIENT_URL || 'https://yourdomain.com',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, postman)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      // Log blocked origins for debugging
+      console.warn(`CORS blocked: ${origin} not in allowed origins`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 app.use(cors(corsOptions));
 
