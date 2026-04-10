@@ -25,6 +25,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="assets/js/analytics.js"></script>
+    <script src="assets/js/app.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .glassmorphism {
@@ -721,52 +722,22 @@
 
     <script src="./assets/js/api.js"></script>
     <script>
-        // Initialize dark mode icon
-        (function() {
-            const html = document.documentElement;
-            const darkIcon = document.getElementById('dark-mode-icon');
-            
-            if (html.classList.contains('dark')) {
-                darkIcon.className = 'fas fa-sun';
-            }
-        })();
-
-        // Dark mode toggle
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        const darkModeIcon = document.getElementById('dark-mode-icon');
+        // Initialize dark mode icon (app.js will handle this)
+        // Chart update on dark mode change
         const html = document.documentElement;
-        
-        darkModeToggle.addEventListener('click', () => {
-            html.classList.toggle('dark');
-            const isDark = html.classList.contains('dark');
-            localStorage.setItem('darkMode', isDark ? 'true' : 'false');
-            darkModeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-            
-            // Update charts to reflect dark/light mode changes
-            setTimeout(() => {
-                updateAllCharts();
-            }, 100);
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    // Dark mode changed, update charts
+                    setTimeout(() => {
+                        updateAllCharts();
+                    }, 100);
+                }
+            });
         });
+        observer.observe(html, { attributes: true });
 
-        // Sidebar toggles
-        const sidebarMobileToggle = document.getElementById('sidebar-toggle-mobile');
-        const sidebarDesktopToggle = document.getElementById('sidebar-toggle-desktop');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-        const sidebar = document.getElementById('sidebar');
-        
-        sidebarMobileToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('hidden');
-            sidebarOverlay.classList.toggle('hidden');
-        });
-        
-        sidebarDesktopToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('hidden');
-        });
-        
-        sidebarOverlay.addEventListener('click', () => {
-            sidebar.classList.add('hidden');
-            sidebarOverlay.classList.add('hidden');
-        });
+        // Sidebar toggles are now handled by app.js
 
         // Analytics data
         let leads = [];

@@ -166,6 +166,7 @@
             }
         })();
     </script>
+    <script src="assets/js/app.js"></script>
 </head>
 <body class="bg-gray-50 dark:bg-secondary-900 text-gray-900 dark:text-gray-100 min-h-screen">
     
@@ -390,38 +391,6 @@
 
     <!-- JavaScript -->
     <script>
-        // Dark Mode Toggle
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        const darkModeIcon = document.getElementById('dark-mode-icon');
-        const html = document.documentElement;
-
-        darkModeToggle.addEventListener('click', () => {
-            html.classList.toggle('dark');
-            const isDark = html.classList.contains('dark');
-            localStorage.setItem('darkMode', isDark);
-            darkModeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-        });
-
-        // Sidebar Toggle
-        const sidebarToggleMobile = document.getElementById('sidebar-toggle-mobile');
-        const sidebarToggleDesktop = document.getElementById('sidebar-toggle-desktop');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-
-        sidebarToggleMobile.addEventListener('click', () => {
-            sidebar.classList.toggle('hidden');
-            sidebarOverlay.classList.toggle('hidden');
-        });
-
-        sidebarToggleDesktop.addEventListener('click', () => {
-            sidebar.classList.toggle('hidden');
-        });
-
-        sidebarOverlay.addEventListener('click', () => {
-            sidebar.classList.add('hidden');
-            sidebarOverlay.classList.add('hidden');
-        });
-
         // Color picker sync
         const primaryColorPicker = document.getElementById('primary-color');
         const primaryColorText = document.getElementById('primary-color-text');
@@ -450,9 +419,82 @@
             });
         }
 
-        // Form save handlers
+        // Districts save/load functionality
+        const districtsTextarea = document.getElementById('districts-list');
+        const saveDistrictsButton = document.querySelector('button:has(i.fa-save) + button:has(i.fa-save)'); // This selector might not work
+        
+        // Better: Find button by its text content
+        function getDistrictsSaveButton() {
+            const buttons = document.querySelectorAll('button[type="button"]');
+            for (let btn of buttons) {
+                if (btn.textContent.includes('Save District Settings')) {
+                    return btn;
+                }
+            }
+            return null;
+        }
+
+        // Load saved districts on page load
+        function loadDistricts() {
+            if (!districtsTextarea) return;
+            const savedDistricts = localStorage.getItem('mapleads_districts');
+            if (savedDistricts) {
+                districtsTextarea.value = savedDistricts;
+            }
+        }
+
+        // Save districts to localStorage
+        function saveDistricts() {
+            if (!districtsTextarea) return;
+            const districts = districtsTextarea.value.trim();
+            localStorage.setItem('mapleads_districts', districts);
+            
+            // Parse districts into array for cities event
+            const citiesArray = districts.split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+            
+            // Dispatch custom events to notify other pages
+            window.dispatchEvent(new CustomEvent('districtsUpdated', {
+                detail: { districts: districts }
+            }));
+            
+            // Also dispatch citiesUpdated for compatibility with CitiesManager
+            window.dispatchEvent(new CustomEvent('citiesUpdated', {
+                detail: { cities: citiesArray }
+            }));
+            
+            return true;
+        }
+
+        // Initialize districts on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDistricts();
+            
+            // Attach save handler to district save button
+            const districtsSaveBtn = getDistrictsSaveButton();
+            if (districtsSaveBtn) {
+                districtsSaveBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+                    this.disabled = true;
+                    
+                    setTimeout(() => {
+                        const success = saveDistricts();
+                        this.innerHTML = '<i class="fas fa-check mr-2"></i>Saved!';
+                        setTimeout(() => {
+                            this.innerHTML = originalText;
+                            this.disabled = false;
+                        }, 1500);
+                    }, 800);
+                });
+            }
+        });
+
+        // Form save handlers for other buttons (excluding districts which we handled above)
         document.querySelectorAll('button[type="button"]').forEach(button => {
-            if (button.textContent.includes('Save')) {
+            if (button.textContent.includes('Save') && !button.textContent.includes('District Settings')) {
                 button.addEventListener('click', () => {
                     const originalText = button.innerHTML;
                     button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';

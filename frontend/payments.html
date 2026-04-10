@@ -156,6 +156,7 @@
             }
         })();
     </script>
+    <script src="assets/js/app.js"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
     
@@ -304,59 +305,7 @@
         </main>
     </div>
 
-    <!-- JavaScript for sidebar toggle and dark mode -->
-    <script>
-        // Sidebar toggle for mobile
-        document.getElementById('sidebar-toggle-mobile').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            sidebar.classList.toggle('hidden');
-            overlay.classList.toggle('hidden');
-            sidebar.classList.add('lg:flex');
-        });
-
-        // Sidebar toggle for desktop collapse
-        document.getElementById('sidebar-toggle-desktop').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            const icon = this.querySelector('i');
-            const text = this.querySelector('span');
-            
-            if (sidebar.classList.contains('w-64')) {
-                sidebar.classList.remove('w-64');
-                sidebar.classList.add('w-20');
-                icon.classList.remove('fa-chevron-left');
-                icon.classList.add('fa-chevron-right');
-                text.textContent = 'Expand';
-            } else {
-                sidebar.classList.remove('w-20');
-                sidebar.classList.add('w-64');
-                icon.classList.remove('fa-chevron-right');
-                icon.classList.add('fa-chevron-left');
-                text.textContent = 'Collapse';
-            }
-        });
-
-        // Close sidebar on overlay click (mobile)
-        document.getElementById('sidebar-overlay').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.add('hidden');
-            this.classList.add('hidden');
-        });
-
-        // Dark mode toggle
-        document.getElementById('dark-mode-toggle').addEventListener('click', function() {
-            const html = document.documentElement;
-            const icon = document.getElementById('dark-mode-icon');
-            
-            if (html.classList.contains('dark')) {
-                html.classList.remove('dark');
-                localStorage.setItem('darkMode', 'false');
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-            } else {
-                html.classList.add('dark');
-                localStorage.setItem('darkMode', 'true');
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-            }
-        });
+    <!-- JavaScript for sidebar toggle and dark mode is now in app.js -->
+    <script src="assets/js/payments.js"></script>
+</body>
+</html>

@@ -142,6 +142,7 @@
             }
         })();
     </script>
+    <script src="assets/js/app.js"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
     
@@ -372,21 +373,7 @@
             darkModeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
         });
 
-        // Sidebar toggle
-        const sidebarMobileToggle = document.getElementById('sidebar-toggle-mobile');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-        
-        sidebarMobileToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('hidden');
-            sidebar.classList.add('lg:flex', 'fixed', 'inset-y-0', 'left-0', 'z-40');
-            sidebarOverlay.classList.toggle('hidden');
-        });
-        
-        sidebarOverlay.addEventListener('click', () => {
-            sidebar.classList.add('hidden');
-            sidebarOverlay.classList.add('hidden');
-        });
+        // Sidebar toggle is now handled by app.js
 
         // Modal
         const addLeadBtn = document.getElementById('add-lead-btn');

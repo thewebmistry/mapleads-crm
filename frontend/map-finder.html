@@ -186,6 +186,7 @@
             color: #4a5568;
         }
     </style>
+    <script src="assets/js/app.js"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
     <header class="sticky top-0 z-30 bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md border-b border-white/20 dark:border-secondary-700/50 shadow-soft">
@@ -209,8 +210,8 @@
                     <i class="fas fa-search text-gray-500 dark:text-gray-400"></i>
                     <input type="text" placeholder="Search..." class="bg-transparent border-none outline-none text-sm w-40">
                 </div>
-                <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
-                    <i class="fas fa-moon text-gray-700 dark:text-gray-300"></i>
+                <button id="dark-mode-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+                    <i id="dark-mode-icon" class="fas fa-moon text-gray-700 dark:text-gray-300"></i>
                 </button>
                 <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-purple-500 flex items-center justify-center text-white font-semibold">
                     IA
@@ -259,6 +260,8 @@
             </div>
         </aside>
 
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
+
         <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 dark:bg-gray-900">
             <div class="max-w-7xl mx-auto">
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
@@ -285,14 +288,7 @@
                                 <i class="fas fa-map-marker-alt absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                                 <select id="city-input" class="w-full pl-12 pr-4 py-3.5 border border-secondary-300 dark:border-secondary-600 rounded-xl bg-white/95 dark:bg-secondary-900/95 focus-gradient-ring focus:border-transparent transition-all duration-300">
                                     <option value="">Select a city</option>
-                                    <option value="Mumbai">Mumbai</option>
-                                    <option value="Delhi">Delhi</option>
-                                    <option value="Bangalore">Bangalore</option>
-                                    <option value="Hyderabad">Hyderabad</option>
-                                    <option value="Chennai">Chennai</option>
-                                    <option value="Kolkata">Kolkata</option>
-                                    <option value="Pune">Pune</option>
-                                    <option value="Ahmedabad">Ahmedabad</option>
+                                    <!-- Cities will be populated dynamically from settings -->
                                 </select>
                             </div>
                         </div>
@@ -365,17 +361,21 @@
                             <thead>
                                 <tr>
                                     <th class="text-left">Business</th>
-                                    <th class="text-left">Owner</th>
-                                    <th class="text-left">District</th>
+                                    <th class="text-left">Phone</th>
+                                    <th class="text-left">Email</th>
+                                    <th class="text-left">Website</th>
+                                    <th class="text-left">Instagram</th>
+                                    <th class="text-left">Facebook</th>
                                     <th class="text-left">Rating</th>
-                                    <th class="text-left">Contact</th>
+                                    <th class="text-left">Address</th>
+                                    <th class="text-left">Status</th>
                                     <th class="text-left">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="results-table-body">
                                 <!-- Empty state row -->
                                 <tr id="empty-state-row">
-                                    <td colspan="6" class="py-12 text-center">
+                                    <td colspan="10" class="py-12 text-center">
                                         <div class="empty-state">
                                             <i class="fas fa-search"></i>
                                             <h4 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">No results yet</h4>
@@ -424,6 +424,12 @@
                     
                     console.log('Sending payload:', payload);
                     
+                    // Show loading state
+                    const originalText = searchBtn.innerHTML;
+                    searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Searching...';
+                    searchBtn.disabled = true;
+                    searchBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                    
                     try {
                         // Call API via window.api.post if available
                         let response;
@@ -451,16 +457,26 @@
                         if (response.success && response.data && response.data.businesses) {
                             renderResults(response.data.businesses);
                             updateResultsCount(response.data.businesses.length);
+                            if (response.data.businesses.length === 0) {
+                                showToast('No businesses found for your search criteria.', 'info');
+                            }
                         } else {
                             console.error('Invalid API response structure:', response);
+                            showToast('API returned an invalid response. Please try again.', 'error');
                             renderResults([]);
                             updateResultsCount(0);
                         }
                         
                     } catch (error) {
                         console.error('Error calling API:', error);
+                        showToast('Failed to fetch results. Check your connection and try again.', 'error');
                         renderResults([]);
                         updateResultsCount(0);
+                    } finally {
+                        // Restore button state
+                        searchBtn.innerHTML = originalText;
+                        searchBtn.disabled = false;
+                        searchBtn.classList.remove('opacity-75', 'cursor-not-allowed');
                     }
                 });
             }
@@ -536,6 +552,18 @@
             
             // Default to restaurant
             return 'restaurant';
+        }
+
+        // Get status color class
+        function getStatusColor(status) {
+            const statusLower = (status || 'new').toLowerCase();
+            if (statusLower === 'new') return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+            if (statusLower === 'contacted') return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400';
+            if (statusLower === 'qualified') return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+            if (statusLower === 'proposal') return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+            if (statusLower === 'negotiation') return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400';
+            if (statusLower === 'closed') return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+            return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
         }
 
         // Toast notification
@@ -668,11 +696,19 @@
                         <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">${business.businessType || business.category || ''}</div>
                     </td>
                     <td class="py-4 px-4">
-                        <div class="text-gray-700 dark:text-gray-300">${business.ownerName || 'N/A'}</div>
+                        <div class="text-gray-700 dark:text-gray-300">${business.phone || 'N/A'}</div>
                     </td>
                     <td class="py-4 px-4">
-                        <div class="text-gray-700 dark:text-gray-300">${business.district || 'N/A'}</div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">${business.city || ''}</div>
+                        <div class="text-gray-700 dark:text-gray-300">${business.email || 'N/A'}</div>
+                    </td>
+                    <td class="py-4 px-4">
+                        ${business.website ? `<a href="${business.website.startsWith('http') ? business.website : 'https://' + business.website}" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline truncate block">${business.website.replace('https://', '').replace('http://', '')}</a>` : '<span class="text-gray-500 dark:text-gray-400">N/A</span>'}
+                    </td>
+                    <td class="py-4 px-4">
+                        ${business.instagram ? `<a href="${business.instagram.startsWith('http') ? business.instagram : 'https://instagram.com/' + business.instagram}" target="_blank" class="text-pink-600 dark:text-pink-400 hover:underline truncate block">${business.instagram.replace('https://instagram.com/', '').replace('https://www.instagram.com/', '')}</a>` : '<span class="text-gray-500 dark:text-gray-400">N/A</span>'}
+                    </td>
+                    <td class="py-4 px-4">
+                        ${business.facebook ? `<a href="${business.facebook.startsWith('http') ? business.facebook : 'https://facebook.com/' + business.facebook}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline truncate block">${business.facebook.replace('https://facebook.com/', '').replace('https://www.facebook.com/', '')}</a>` : '<span class="text-gray-500 dark:text-gray-400">N/A</span>'}
                     </td>
                     <td class="py-4 px-4">
                         <div class="flex items-center">
@@ -680,18 +716,17 @@
                                 <i class="fas fa-star"></i>
                             </span>
                             <span class="font-medium text-gray-900 dark:text-gray-100">${business.rating?.toFixed(1) || 'N/A'}</span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">(${business.reviewCount || 0} reviews)</span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">(${business.reviewCount || 0})</span>
                         </div>
                     </td>
                     <td class="py-4 px-4">
-                        <div class="space-y-1">
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <i class="fas fa-phone mr-2 text-gray-400"></i>${business.phone || 'N/A'}
-                            </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <i class="fas fa-envelope mr-2 text-gray-400"></i>${business.email || 'N/A'}
-                            </div>
-                        </div>
+                        <div class="text-gray-700 dark:text-gray-300">${business.district || 'N/A'}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">${business.city || ''}</div>
+                    </td>
+                    <td class="py-4 px-4">
+                        <span class="px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(business.status || 'new')} capitalize">
+                            ${business.status || 'new'}
+                        </span>
                     </td>
                     <td class="py-4 px-4">
                         <div class="flex space-x-2">
@@ -708,21 +743,13 @@
                             </button>` : `<button class="p-2 rounded-lg bg-gray-100 dark:bg-gray-900/30 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50" title="No Facebook" disabled>
                                 <i class="fab fa-facebook"></i>
                             </button>`}
-                            ${business.website ? `<button onclick="window.open('${business.website.startsWith('http') ? business.website : 'https://' + business.website}', '_blank')" class="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 hover:bg-purple-200 dark:hover:bg-purple-800 hover:scale-110 hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300" title="Website">
-                                <i class="fas fa-globe"></i>
-                            </button>` : `<button class="p-2 rounded-lg bg-gray-100 dark:bg-gray-900/30 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50" title="No Website" disabled>
-                                <i class="fas fa-globe"></i>
-                            </button>`}
-                            ${business.email ? `<button onclick="copyToClipboard('${business.email}', 'Email')" class="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-800 hover:scale-110 hover:shadow-lg hover:shadow-yellow-500/30 transition-all duration-300" title="Copy Email">
+                            ${business.email ? `<button onclick="copyToClipboard('${business.email}', 'Email')" class="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-800 hover:scale-110 hover:shadow-lg hover:shadow-yellow-500/30 transition-all duration-300" title="Email">
                                 <i class="fas fa-envelope"></i>
                             </button>` : `<button class="p-2 rounded-lg bg-gray-100 dark:bg-gray-900/30 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50" title="No Email" disabled>
                                 <i class="fas fa-envelope"></i>
                             </button>`}
-                            <button class="p-2 rounded-lg bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:bg-primary-200 dark:hover:bg-primary-800 hover:scale-110 hover:shadow-lg hover:shadow-primary-500/30 transition-all duration-300" title="View on Maps" onclick="window.open('${business.mapsLink || '#'}', '_blank')">
-                                <i class="fas fa-map-marker-alt"></i>
-                            </button>
-                            <button class="p-2 rounded-lg bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-800/50 transition-colors" title="Save as Lead" onclick="saveAsLead(${JSON.stringify(business).replace(/"/g, '"')})">
-                                <i class="fas fa-save"></i>
+                            <button class="p-2 rounded-lg bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:bg-primary-200 dark:hover:bg-primary-800 hover:scale-110 hover:shadow-lg hover:shadow-primary-500/30 transition-all duration-300" title="Add to CRM" onclick="saveAsLead(${JSON.stringify(business).replace(/"/g, '"')})">
+                                <i class="fas fa-plus"></i>
                             </button>
                         </div>
                     </td>
@@ -775,12 +802,45 @@
                             
                             <div class="flex items-center">
                                 <div class="w-8 flex-shrink-0">
+                                    <i class="fas fa-envelope text-gray-400"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <span class="text-gray-700 dark:text-gray-300 truncate">${business.email || 'N/A'}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-8 flex-shrink-0">
                                     <i class="fas fa-globe text-gray-400"></i>
                                 </div>
                                 <div class="flex-1">
                                     ${business.website ?
                                         `<a href="${business.website}" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline truncate block">${business.website.replace('https://', '').replace('http://', '')}</a>` :
                                         `<span class="text-gray-500 dark:text-gray-400">No website</span>`
+                                    }
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-8 flex-shrink-0">
+                                    <i class="fab fa-instagram text-gray-400"></i>
+                                </div>
+                                <div class="flex-1">
+                                    ${business.instagram ?
+                                        `<a href="${business.instagram.startsWith('http') ? business.instagram : 'https://instagram.com/' + business.instagram}" target="_blank" class="text-pink-600 dark:text-pink-400 hover:underline truncate block">${business.instagram.replace('https://instagram.com/', '').replace('https://www.instagram.com/', '')}</a>` :
+                                        `<span class="text-gray-500 dark:text-gray-400">No Instagram</span>`
+                                    }
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-8 flex-shrink-0">
+                                    <i class="fab fa-facebook text-gray-400"></i>
+                                </div>
+                                <div class="flex-1">
+                                    ${business.facebook ?
+                                        `<a href="${business.facebook.startsWith('http') ? business.facebook : 'https://facebook.com/' + business.facebook}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline truncate block">${business.facebook.replace('https://facebook.com/', '').replace('https://www.facebook.com/', '')}</a>` :
+                                        `<span class="text-gray-500 dark:text-gray-400">No Facebook</span>`
                                     }
                                 </div>
                             </div>
@@ -795,15 +855,21 @@
                             </div>
                         </div>
                         
-                        <div class="flex justify-between mt-5 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <button class="px-3 py-2 text-sm rounded-lg bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-800/50 transition-colors flex items-center" onclick="window.open('${business.mapsLink || '#'}', '_blank')">
-                                <i class="fas fa-map-marker-alt mr-2"></i> Maps
-                            </button>
-                            <button class="px-3 py-2 text-sm rounded-lg bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-800/50 transition-colors flex items-center" onclick="saveAsLead(${JSON.stringify(business).replace(/"/g, '"')})">
-                                <i class="fas fa-save mr-2"></i> Save
-                            </button>
-                            <button class="px-3 py-2 text-sm rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800/50 transition-colors flex items-center">
-                                <i class="fas fa-eye mr-2"></i> Details
+                        <div class="flex flex-wrap gap-2 mt-5 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            ${business.phone ? `<button class="px-3 py-2 text-sm rounded-lg bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-800/50 transition-colors flex items-center" onclick="window.open('https://wa.me/${business.phone.replace(/[^0-9+]/g, '')}', '_blank')">
+                                <i class="fab fa-whatsapp mr-2"></i> WhatsApp
+                            </button>` : ''}
+                            ${business.instagram ? `<button class="px-3 py-2 text-sm rounded-lg bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-800/50 transition-colors flex items-center" onclick="window.open('${business.instagram.startsWith('http') ? business.instagram : 'https://instagram.com/' + business.instagram}', '_blank')">
+                                <i class="fab fa-instagram mr-2"></i> Instagram
+                            </button>` : ''}
+                            ${business.facebook ? `<button class="px-3 py-2 text-sm rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800/50 transition-colors flex items-center" onclick="window.open('${business.facebook.startsWith('http') ? business.facebook : 'https://facebook.com/' + business.facebook}', '_blank')">
+                                <i class="fab fa-facebook mr-2"></i> Facebook
+                            </button>` : ''}
+                            ${business.email ? `<button class="px-3 py-2 text-sm rounded-lg bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-800/50 transition-colors flex items-center" onclick="copyToClipboard('${business.email}', 'Email')">
+                                <i class="fas fa-envelope mr-2"></i> Email
+                            </button>` : ''}
+                            <button class="px-3 py-2 text-sm rounded-lg bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-800/50 transition-colors flex items-center" onclick="saveAsLead(${JSON.stringify(business).replace(/"/g, '"')})">
+                                <i class="fas fa-plus mr-2"></i> Add to CRM
                             </button>
                         </div>
                     `;
@@ -818,6 +884,121 @@
             if (countElement) {
                 countElement.textContent = count;
             }
+        }
+
+        // ============================================
+        // CITY DROPDOWN INTEGRATION WITH SETTINGS
+        // ============================================
+        
+        // Load and populate city dropdown from saved settings
+        function populateCityDropdown() {
+            const citySelect = document.getElementById('city-input');
+            if (!citySelect) return;
+            
+            // Check if MapLeads app is available (app.js loaded)
+            if (window.MapLeads && window.MapLeads.cities) {
+                // Use the CitiesManager from app.js
+                const selectedCity = localStorage.getItem('mapleads_selected_city') || '';
+                window.MapLeads.cities.populateCityDropdown(citySelect, true, selectedCity);
+                
+                // Set up auto-refresh
+                window.MapLeads.cities.setupAutoRefresh('city-input');
+            } else {
+                // Fallback: load cities directly from localStorage
+                const savedDistricts = localStorage.getItem('mapleads_districts');
+                let cities = [];
+                
+                if (savedDistricts && savedDistricts.trim() !== '') {
+                    cities = savedDistricts.split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0);
+                }
+                
+                // If no saved cities, use default sample cities
+                if (cities.length === 0) {
+                    cities = ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad'];
+                }
+                
+                // Get currently selected city from localStorage
+                const selectedCity = localStorage.getItem('mapleads_selected_city') || '';
+                
+                // Clear existing options except first placeholder
+                while (citySelect.options.length > 1) {
+                    citySelect.remove(1);
+                }
+                
+                // Add city options
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    if (city === selectedCity) {
+                        option.selected = true;
+                    }
+                    citySelect.appendChild(option);
+                });
+                
+                // Set up event listener for city changes
+                citySelect.addEventListener('change', function() {
+                    localStorage.setItem('mapleads_selected_city', this.value);
+                });
+                
+                // Listen for districts updates from settings page
+                window.addEventListener('districtsUpdated', function() {
+                    // Re-populate dropdown
+                    const savedDistricts = localStorage.getItem('mapleads_districts');
+                    let updatedCities = [];
+                    
+                    if (savedDistricts && savedDistricts.trim() !== '') {
+                        updatedCities = savedDistricts.split('\n')
+                            .map(line => line.trim())
+                            .filter(line => line.length > 0);
+                    }
+                    
+                    if (updatedCities.length === 0) {
+                        updatedCities = ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad'];
+                    }
+                    
+                    const currentSelected = citySelect.value;
+                    
+                    // Clear and repopulate
+                    while (citySelect.options.length > 1) {
+                        citySelect.remove(1);
+                    }
+                    
+                    updatedCities.forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city;
+                        option.textContent = city;
+                        if (city === currentSelected) {
+                            option.selected = true;
+                        }
+                        citySelect.appendChild(option);
+                    });
+                });
+            }
+        }
+        
+        // Save selected city when changed
+        function setupCitySelectionListener() {
+            const citySelect = document.getElementById('city-input');
+            if (citySelect) {
+                citySelect.addEventListener('change', function() {
+                    localStorage.setItem('mapleads_selected_city', this.value);
+                });
+            }
+        }
+        
+        // Initialize city dropdown when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            populateCityDropdown();
+            setupCitySelectionListener();
+        });
+        
+        // Also initialize if DOM is already loaded
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+            setTimeout(populateCityDropdown, 100);
+            setTimeout(setupCitySelectionListener, 100);
         }
     </script>
 </body>

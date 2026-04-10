@@ -243,17 +243,9 @@
             color: white;
         }
     </style>
+    <!-- Include shared JavaScript utilities -->
+    <script src="assets/js/app.js"></script>
     <script>
-        // Initialize dark mode BEFORE page renders
-        (function() {
-            const html = document.documentElement;
-            const savedTheme = localStorage.getItem('darkMode');
-            
-            if (savedTheme === 'true' || (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                html.classList.add('dark');
-            }
-        })();
-        
         // Animate counters
         function animateCounter(element, target) {
             let current = 0;

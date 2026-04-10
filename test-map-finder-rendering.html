@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Map Finder Rendering</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .test-container { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        .success { color: green; }
+        .error { color: red; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Test Map Finder Table Rendering</h1>
+    
+    <div class="test-container">
+        <h2>Mock Data</h2>
+        <pre id="mock-data"></pre>
+        
+        <h2>Generated Table</h2>
+        <div id="table-container"></div>
+        
+        <h2>Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+    
+    <script>
+        // Mock business data matching scraper response structure
+        const mockBusinesses = [
+            {
+                businessName: "Pizza Palace",
+                businessType: "Restaurant",
+                category: "Restaurant",
+                phone: "+1234567890",
+                email: "contact@pizzapalace.com",
+                website: "https://pizzapalace.com",
+                instagram: "pizzapalace",
+                facebook: "pizzapalaceofficial",
+                rating: 4.5,
+                reviewCount: 120,
+                district: "Downtown",
+                city: "New York",
+                address: "123 Main St, Downtown, New York",
+                status: "new",
+                mapsLink: "https://maps.google.com/?q=Pizza+Palace"
+            },
+            {
+                businessName: "Tech Solutions Inc",
+                businessType: "Technology",
+                category: "Technology",
+                phone: "+1987654321",
+                email: "info@techsolutions.com",
+                website: "https://techsolutions.com",
+                instagram: "techsolutions",
+                facebook: "techsolutions",
+                rating: 4.8,
+                reviewCount: 89,
+                district: "Silicon Valley",
+                city: "San Francisco",
+                address: "456 Tech Blvd, Silicon Valley",
+                status: "qualified",
+                mapsLink: "https://maps.google.com/?q=Tech+Solutions"
+            },
+            {
+                businessName: "Fitness Gym",
+                businessType: "Gym",
+                category: "Fitness",
+                phone: "+1555123456",
+                email: "",
+                website: "",
+                instagram: "fitnessgym",
+                facebook: "",
+                rating: 4.2,
+                reviewCount: 56,
+                district: "Westside",
+                city: "Los Angeles",
+                address: "789 Fitness Ave, Westside",
+                status: "contacted",
+                mapsLink: "https://maps.google.com/?q=Fitness+Gym"
+            }
+        ];
+        
+        // Display mock data
+        document.getElementById('mock-data').textContent = JSON.stringify(mockBusinesses, null, 2);
+        
+        // Copy required functions from map-finder.html
+        function getStatusColor(status) {
+            const statusLower = (status || 'new').toLowerCase();
+            if (statusLower === 'new') return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+            if (statusLower === 'contacted') return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400';
+            if (statusLower === 'qualified') return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+            if (statusLower === 'proposal') return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+            if (statusLower === 'negotiation') return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400';
+            if (statusLower === 'closed') return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+            return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+        }
+        
+        function copyToClipboard(text, label = 'Text') {
+            navigator.clipboard.writeText(text).then(() => {
+                console.log(`${label} copied to clipboard`);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
+        
+        // Simplified renderResults function for testing
+        function renderResults(businesses) {
+            const container = document.getElementById('table-container');
+            container.innerHTML = '';
+            
+            if (!businesses || businesses.length === 0) {
+                container.innerHTML = '<p>No businesses found</p>';
+                return;
+            }
+            
+            // Create table
+            const table = document.createElement('table');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Business</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Website</th>
+                        <th>Instagram</th>
+                        <th>Facebook</th>
+                        <th>Rating</th>
+                        <th>Address</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="results-table-body">
+                </tbody>
+            `;
+            
+            const tbody = table.querySelector('#results-table-body');
+            
+            businesses.forEach(business => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div class="font-medium">${business.businessName || 'N/A'}</div>
+                        <div class="text-sm text-gray-500">${business.businessType || business.category || ''}</div>
+                    </td>
+                    <td>${business.phone || 'N/A'}</td>
+                    <td>${business.email || 'N/A'}</td>
+                    <td>
+                        ${business.website ? `<a href="${business.website}" target="_blank">${business.website.replace('https://', '').replace('http://', '')}</a>` : 'N/A'}
+                    </td>
+                    <td>
+                        ${business.instagram ? `<a href="https://instagram.com/${business.instagram}" target="_blank">${business.instagram}</a>` : 'N/A'}
+                    </td>
+                    <td>
+                        ${business.facebook ? `<a href="https://facebook.com/${business.facebook}" target="_blank">${business.facebook}</a>` : 'N/A'}
+                    </td>
+                    <td>
+                        <div class="flex items-center">
+                            <span>⭐ ${business.rating?.toFixed(1) || 'N/A'}</span>
+                            <span class="text-sm text-gray-500 ml-2">(${business.reviewCount || 0})</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div>${business.district || 'N/A'}</div>
+                        <div class="text-sm text-gray-500">${business.city || ''}</div>
+                    </td>
+                    <td>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(business.status)}">
+                            ${business.status || 'new'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="flex space-x-1">
+                            ${business.phone ? `<button class="p-1 bg-green-100 text-green-800 rounded" title="WhatsApp">📱</button>` : ''}
+                            ${business.instagram ? `<button class="p-1 bg-pink-100 text-pink-800 rounded" title="Instagram">📸</button>` : ''}
+                            ${business.facebook ? `<button class="p-1 bg-blue-100 text-blue-800 rounded" title="Facebook">f</button>` : ''}
+                            ${business.email ? `<button class="p-1 bg-yellow-100 text-yellow-800 rounded" title="Email">✉️</button>` : ''}
+                            <button class="p-1 bg-primary-100 text-primary-800 rounded" title="Add to CRM">➕</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            container.appendChild(table);
+            
+            // Run tests
+            runTests(businesses);
+        }
+        
+        function runTests(businesses) {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '';
+            
+            const tests = [
+                {
+                    name: 'Table has correct number of columns',
+                    test: () => {
+                        const headers = document.querySelectorAll('th');
+                        return headers.length === 10;
+                    }
+                },
+                {
+                    name: 'All required columns present',
+                    test: () => {
+                        const headers = Array.from(document.querySelectorAll('th')).map(th => th.textContent.trim());
+                        const required = ['Business', 'Phone', 'Email', 'Website', 'Instagram', 'Facebook', 'Rating', 'Address', 'Status', 'Actions'];
+                        return required.every(col => headers.includes(col));
+                    }
+                },
+                {
+                    name: 'Correct number of rows rendered',
+                    test: () => {
+                        const rows = document.querySelectorAll('tbody tr');
+                        return rows.length === businesses.length;
+                    }
+                },
+                {
+                    name: 'Business names displayed',
+                    test: () => {
+                        const firstRow = document.querySelector('tbody tr');
+                        return firstRow && firstRow.textContent.includes('Pizza Palace');
+                    }
+                },
+                {
+                    name: 'Phone numbers displayed',
+                    test: () => {
+                        const cells = document.querySelectorAll('td:nth-child(2)');
+                        return cells.length > 0 && cells[0].textContent.includes('+1234567890');
+                    }
+                },
+                {
+                    name: 'Status badges rendered',
+                    test: () => {
+                        const statusCells = document.querySelectorAll('td:nth-child(9)');
+                        return statusCells.length === businesses.length;
+                    }
+                },
+                {
+                    name: 'Action buttons present',
+                    test: () => {
+                        const actionCells = document.querySelectorAll('td:nth-child(10)');
+                        return actionCells.length === businesses.length && 
+                               actionCells[0].querySelectorAll('button').length >= 2;
+                    }
+                }
+            ];
+            
+            let passed = 0;
+            let failed = 0;
+            
+            tests.forEach(test => {
+                const div = document.createElement('div');
+                try {
+                    const result = test.test();
+                    if (result) {
+                        div.innerHTML = `<span class="success">✓ PASS:</span> ${test.name}`;
+                        passed++;
+                    } else {
+                        div.innerHTML = `<span class="error">✗ FAIL:</span> ${test.name}`;
+                        failed++;
+                    }
+                } catch (error) {
+                    div.innerHTML = `<span class="error">✗ ERROR:</span> ${test.name} - ${error.message}`;
+                    failed++;
+                }
+                results.appendChild(div);
+            });
+            
+            const summary = document.createElement('div');
+            summary.innerHTML = `<h3>Summary: ${passed} passed, ${failed} failed</h3>`;
+            results.appendChild(summary);
+        }
+        
+        // Run the test
+        document.addEventListener('DOMContentLoaded', () => {
+            renderResults(mockBusinesses);
+        });
+    </script>
+</body>
+</html>

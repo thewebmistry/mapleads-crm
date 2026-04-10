@@ -225,6 +225,7 @@
             }
         })();
     </script>
+    <script src="assets/js/app.js"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
     
@@ -422,38 +423,6 @@
                 darkIcon.className = 'fas fa-sun';
             }
         })();
-
-        // Dark mode toggle
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        const darkModeIcon = document.getElementById('dark-mode-icon');
-        const html = document.documentElement;
-        
-        darkModeToggle.addEventListener('click', () => {
-            html.classList.toggle('dark');
-            const isDark = html.classList.contains('dark');
-            localStorage.setItem('darkMode', isDark ? 'true' : 'false');
-            darkModeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-        });
-
-        // Sidebar toggles
-        const sidebarMobileToggle = document.getElementById('sidebar-toggle-mobile');
-        const sidebarDesktopToggle = document.getElementById('sidebar-toggle-desktop');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-        const sidebar = document.getElementById('sidebar');
-        
-        sidebarMobileToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('hidden');
-            sidebarOverlay.classList.toggle('hidden');
-        });
-        
-        sidebarDesktopToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('hidden');
-        });
-        
-        sidebarOverlay.addEventListener('click', () => {
-            sidebar.classList.add('hidden');
-            sidebarOverlay.classList.add('hidden');
-        });
 
         // Kanban functionality
         const stages = ['new', 'contacted', 'replied', 'demo_sent', 'closed'];
