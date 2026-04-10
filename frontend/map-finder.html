@@ -428,7 +428,7 @@
                         } else {
                             // Fallback using fetch directly
                             console.warn('window.api.post not found, using fetch directly');
-                            const apiBase = window.api?.config?.BASE_URL || 'http://localhost:5000/api/v1';
+                            const apiBase = "https://mapleads-crm.onrender.com/api/v1";
                             const res = await fetch(`${apiBase}/scraper/maps-search/public`, {
                                 method: 'POST',
                                 headers: {
@@ -487,7 +487,7 @@
 
             try {
                 let response;
-                const apiBase = window.api?.config?.BASE_URL || 'http://localhost:5000/api/v1';
+                const apiBase = "https://mapleads-crm.onrender.com/api/v1";
                 
                 if (window.api && typeof window.api.post === 'function') {
                     response = await window.api.post('/leads', payload);
@@ -589,7 +589,7 @@
         async function refreshLeadCount() {
             try {
                 console.log('Refreshing lead count...');
-                const apiBase = window.api?.config?.BASE_URL || 'http://localhost:5000/api/v1';
+                const apiBase = "https://mapleads-crm.onrender.com/api/v1";
                 let response;
                 
                 if (window.api && typeof window.api.get === 'function') {

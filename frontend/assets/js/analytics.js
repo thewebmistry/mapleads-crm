@@ -52,42 +52,13 @@
         closeRatioChart: null
     };
 
-    // API configuration
-    const API_BASE = window.location.origin.includes('localhost')
-        ? 'http://localhost:5000'
-        : window.location.origin;
-    const STATS_ENDPOINT = `${API_BASE}/api/v1/leads/stats/summary`;
-    let useRealData = false;
+    // Production API configuration
+    const API_BASE = "https://mapleads-crm.onrender.com/api/v1";
+    const STATS_ENDPOINT = `${API_BASE}/leads/stats/summary`;
     let currentData = {};
 
-    // Exact fallback dataset as specified
-    const FALLBACK_DATA = {
-        districts: {
-            'Ranchi': 45,
-            'Lohardaga': 28,
-            'Gumla': 18,
-            'Simdega': 12
-        },
-        revenue: [12000, 18000, 25000, 30000, 22000, 40000],
-        pipeline: {
-            'New': 30,
-            'Contacted': 22,
-            'Replied': 15,
-            'Demo Sent': 9,
-            'Closed': 6
-        },
-        sources: {
-            'Google Maps': 45,
-            'WhatsApp': 20,
-            'Instagram': 18,
-            'Website': 10,
-            'Referral': 7
-        },
-        closeRatio: [10, 18, 24, 31, 36, 42]
-    };
-
     /**
-     * Fetch real stats from API and update currentData
+     * Fetch real stats from production API
      */
     async function fetchRealStats() {
         showLoading(true);
@@ -95,7 +66,8 @@
             const response = await fetch(STATS_ENDPOINT, {
                 headers: {
                     'Accept': 'application/json',
-                    // If authentication is required, add token here
+                    // Add authentication token if needed
+                    'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
                 }
             });
             if (!response.ok) {
@@ -103,45 +75,42 @@
             }
             const result = await response.json();
             if (result.success && result.data) {
-                useRealData = true;
-                // Transform API data to match FALLBACK_DATA structure
-                // For now, we'll keep using FALLBACK_DATA but we could map
-                // Since the API returns different structure, we'll just keep mock data
-                // but we can update metrics with real totals
-                console.log('Real stats loaded', result.data);
-                // Update currentData with API data for later use
+                console.log('Real stats loaded from production API', result.data);
                 currentData = result.data;
             } else {
                 throw new Error('Invalid API response');
             }
         } catch (error) {
-            console.warn('Failed to fetch real stats, using fallback data:', error.message);
-            useRealData = false;
+            console.error('Failed to fetch real stats:', error.message);
+            // Show error to user
+            if (typeof window.showToast === 'function') {
+                window.showToast('Failed to load analytics data', 'error');
+            }
+            // Set empty data
+            currentData = {};
         } finally {
             showLoading(false);
         }
     }
 
     /**
-     * Update metrics with real data if available, otherwise fallback
+     * Update metrics with real data from API
      */
     function updateMetrics() {
-        let totalLeads, totalRevenue, closedLeads, conversionRate, activeLeads;
+        let totalLeads = 0, totalRevenue = 0, closedLeads = 0, conversionRate = 0, activeLeads = 0;
 
-        if (useRealData && currentData.total !== undefined) {
-            totalLeads = currentData.total;
-            // Calculate revenue from byStage totalBudget? For simplicity, use fallback
-            totalRevenue = FALLBACK_DATA.revenue.reduce((a, b) => a + b, 0);
-            closedLeads = currentData.byStage?.find(s => s.stage === 'Closed')?.count || 0;
+        if (currentData.total !== undefined) {
+            totalLeads = currentData.total || 0;
+            // Calculate revenue from byStage totalBudget if available
+            if (currentData.byStage) {
+                totalRevenue = currentData.byStage.reduce((sum, stage) => sum + (stage.totalBudget || 0), 0);
+                closedLeads = currentData.byStage.find(s => s.stage === 'Closed')?.count || 0;
+                activeLeads = currentData.byStage.find(s => s.stage === 'Active')?.count || 0;
+            }
             conversionRate = totalLeads > 0 ? (closedLeads / totalLeads) * 100 : 0;
-            activeLeads = totalLeads - closedLeads;
         } else {
-            // Calculate totals from fallback data
-            totalLeads = Object.values(FALLBACK_DATA.districts).reduce((a, b) => a + b, 0);
-            totalRevenue = FALLBACK_DATA.revenue.reduce((a, b) => a + b, 0);
-            closedLeads = FALLBACK_DATA.pipeline.Closed || 0;
-            conversionRate = totalLeads > 0 ? (closedLeads / totalLeads) * 100 : 0;
-            activeLeads = totalLeads - closedLeads;
+            // No data available
+            console.warn('No analytics data available');
         }
 
         // Update stat cards
@@ -232,20 +201,32 @@
      * Update Top Business Type card with dominant lead source
      */
     function updateTopBusinessType() {
-        const sources = FALLBACK_DATA.sources;
-        // Find dominant source
-        let dominantSource = '';
+        // Use API data if available, otherwise show empty
+        let dominantSource = 'Google Maps';
         let maxCount = 0;
-        Object.entries(sources).forEach(([source, count]) => {
-            if (count > maxCount) {
-                maxCount = count;
-                dominantSource = source;
-            }
-        });
+        let totalFromSources = 0;
+        let percentage = 0;
         
-        // Calculate total leads from all sources
-        const totalFromSources = Object.values(sources).reduce((a, b) => a + b, 0);
-        const percentage = totalFromSources > 0 ? Math.round((maxCount / totalFromSources) * 100) : 0;
+        if (currentData.bySource && Object.keys(currentData.bySource).length > 0) {
+            const sources = currentData.bySource;
+            // Find dominant source
+            Object.entries(sources).forEach(([source, count]) => {
+                if (count > maxCount) {
+                    maxCount = count;
+                    dominantSource = source;
+                }
+            });
+            
+            // Calculate total leads from all sources
+            totalFromSources = Object.values(sources).reduce((a, b) => a + b, 0);
+            percentage = totalFromSources > 0 ? Math.round((maxCount / totalFromSources) * 100) : 0;
+        } else {
+            // No data available
+            dominantSource = 'No data';
+            maxCount = 0;
+            totalFromSources = 0;
+            percentage = 0;
+        }
         
         // Update DOM elements
         if (elements.nicheName) {

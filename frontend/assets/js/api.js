@@ -7,97 +7,15 @@
 (function() {
     'use strict';
 
-    // Detect local development environment
-    const isLocalDevelopment = window.location.hostname === '127.0.0.1' && window.location.port === '5500';
-    const isLocalhost = window.location.hostname === 'localhost';
-    
-    // Base URL configuration
-    let BASE_URL = `${window.location.origin}/api/v1`;
-    
-    // Override for local development on 127.0.0.1:5500 (Live Server default)
-    if (isLocalDevelopment) {
-        // If backend is running on different port (e.g., 5000), adjust accordingly
-        // You can also check for environment variable or localStorage setting
-        const backendPort = localStorage.getItem('backend_port') || '5000';
-        BASE_URL = `http://127.0.0.1:${backendPort}/api/v1`;
-        console.warn('Local development detected on 127.0.0.1:5500, using backend port', backendPort);
-    } else if (isLocalhost && window.location.port !== '5000') {
-        // Localhost with different frontend port
-        const backendPort = localStorage.getItem('backend_port') || '5000';
-        BASE_URL = `http://localhost:${backendPort}/api/v1`;
-    }
+    // Production backend API base URL
+    const API_BASE = "https://mapleads-crm.onrender.com/api/v1";
+    let BASE_URL = API_BASE;
 
-    // Sample fallback leads data for development/demo
-    const FALLBACK_LEADS = [
-        {
-            id: 'fallback-1',
-            businessName: 'Sample Business 1',
-            ownerName: 'John Doe',
-            district: 'Central',
-            whatsapp: '+1234567890',
-            email: 'john@example.com',
-            stage: 'new',
-            budget: 50000,
-            followUpDate: new Date(Date.now() + 86400000).toISOString(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        },
-        {
-            id: 'fallback-2',
-            businessName: 'Sample Business 2',
-            ownerName: 'Jane Smith',
-            district: 'North',
-            whatsapp: '+1234567891',
-            email: 'jane@example.com',
-            stage: 'contacted',
-            budget: 75000,
-            followUpDate: new Date(Date.now() + 172800000).toISOString(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        },
-        {
-            id: 'fallback-3',
-            businessName: 'Sample Business 3',
-            ownerName: 'Bob Johnson',
-            district: 'South',
-            whatsapp: '+1234567892',
-            email: 'bob@example.com',
-            stage: 'replied',
-            budget: 120000,
-            followUpDate: new Date(Date.now() + 259200000).toISOString(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        },
-        {
-            id: 'fallback-4',
-            businessName: 'Sample Business 4',
-            ownerName: 'Alice Brown',
-            district: 'East',
-            whatsapp: '+1234567893',
-            email: 'alice@example.com',
-            stage: 'demo_sent',
-            budget: 90000,
-            followUpDate: new Date(Date.now() + 345600000).toISOString(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        },
-        {
-            id: 'fallback-5',
-            businessName: 'Sample Business 5',
-            ownerName: 'Charlie Wilson',
-            district: 'West',
-            whatsapp: '+1234567894',
-            email: 'charlie@example.com',
-            stage: 'closed',
-            budget: 150000,
-            followUpDate: new Date(Date.now() + 432000000).toISOString(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        }
-    ];
+    // No fallback data in production - rely on API only
+    const FALLBACK_LEADS = [];
 
-    // Helper function for fetch requests with graceful error handling
-    const apiRequest = async (endpoint, options = {}, fallbackData = null) => {
+    // Helper function for fetch requests with production error handling
+    const apiRequest = async (endpoint, options = {}) => {
         const url = `${BASE_URL}${endpoint}`;
         const headers = {
             'Content-Type': 'application/json',
@@ -112,24 +30,14 @@
         try {
             const response = await fetch(url, { ...options, headers });
             
-            // Handle 404 and other non-2xx responses gracefully
+            // Handle non-2xx responses
             if (!response.ok) {
-                if (response.status === 404) {
-                    console.warn(`API endpoint ${endpoint} not found (404). Using fallback data if available.`);
-                    // Return fallback data for GET requests if provided
-                    if (fallbackData !== null && (!options.method || options.method === 'GET')) {
-                        return fallbackData;
-                    }
-                }
-                
-                // For other errors, log warning but don't crash
-                console.warn(`API request failed: ${response.status} ${response.statusText}`, {
+                console.error(`API request failed: ${response.status} ${response.statusText}`, {
                     endpoint,
                     status: response.status,
                     statusText: response.statusText
                 });
                 
-                // Still throw for non-GET or if no fallback, but with a controlled error
                 const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
                 error.status = response.status;
                 error.isApiError = true;
@@ -139,23 +47,21 @@
             return await response.json();
         } catch (error) {
             // Network errors, CORS issues, etc.
-            console.warn('API request failed:', error.message);
+            console.error('API request failed:', error.message);
             
-            // Return fallback data for GET requests if available
-            if (fallbackData !== null && (!options.method || options.method === 'GET')) {
-                console.info('Returning fallback data for', endpoint);
-                return fallbackData;
+            // Show toast notification for user feedback
+            if (typeof window.showToast === 'function') {
+                window.showToast(`API Error: ${error.message}`, 'error');
             }
             
-            // Re-throw for POST/PUT/DELETE where fallback isn't appropriate
             throw error;
         }
     };
 
-    // Safe API request that always returns an array for leads endpoints
-    const safeGetLeads = async () => {
+    // Get leads from production API
+    const getLeadsFromApi = async () => {
         try {
-            const result = await apiRequest('/leads', {}, []);
+            const result = await apiRequest('/leads');
             
             // Handle different response structures
             if (Array.isArray(result)) {
@@ -169,15 +75,15 @@
                 return [];
             }
         } catch (error) {
-            console.warn('Failed to fetch leads, returning fallback data:', error.message);
-            return FALLBACK_LEADS;
+            console.error('Failed to fetch leads:', error.message);
+            throw error; // Re-throw to let caller handle
         }
     };
 
     // Define global api object
     window.api = {
-        // GET /api/v1/leads with fallback
-        getLeads: safeGetLeads,
+        // GET /api/v1/leads
+        getLeads: getLeadsFromApi,
 
         // POST /api/v1/leads
         createLead: (data) => apiRequest('/leads', {
@@ -196,23 +102,23 @@
             method: 'DELETE'
         }),
 
-        // Analytics-specific method with enhanced error handling
+        // Analytics-specific method
         getAnalyticsData: async () => {
             try {
-                const leads = await safeGetLeads();
+                const leads = await getLeadsFromApi();
                 return {
                     success: true,
                     data: leads,
                     timestamp: new Date().toISOString(),
-                    source: leads === FALLBACK_LEADS ? 'fallback' : 'api'
+                    source: 'api'
                 };
             } catch (error) {
-                console.warn('Analytics data fetch failed, using fallback:', error.message);
+                console.error('Analytics data fetch failed:', error.message);
                 return {
                     success: false,
-                    data: FALLBACK_LEADS,
+                    data: [],
                     timestamp: new Date().toISOString(),
-                    source: 'fallback',
+                    source: 'error',
                     error: error.message
                 };
             }
@@ -236,14 +142,10 @@
         // Configuration for debugging
         config: {
             BASE_URL,
-            isLocalDevelopment,
-            fallbackEnabled: true
+            isProduction: true
         }
     };
 
-    // Log initialization with environment info
-    console.log('API service initialized for', window.location.host, '->', BASE_URL);
-    if (isLocalDevelopment || isLocalhost) {
-        console.info('Local development detected. Using fallback data when API is unavailable.');
-    }
+    // Log initialization
+    console.log('API service initialized for production:', BASE_URL);
 })();
