@@ -18,12 +18,15 @@ exports.createLead = async (req, res) => {
       whatsapp,
       email,
       instagram,
+      website,
+      facebook,
       firstMessageDate,
       followUpDate,
       stage,
       status,
       budget,
       remark,
+      address,
       probability,
     } = req.body;
 
@@ -42,12 +45,15 @@ exports.createLead = async (req, res) => {
         whatsapp,
         email,
         instagram,
+        website,
+        facebook,
         firstMessageDate,
         followUpDate,
         stage,
         status,
         budget,
         remark,
+        address,
         probability,
       });
     } else {
@@ -63,12 +69,15 @@ exports.createLead = async (req, res) => {
         whatsapp,
         email,
         instagram,
+        website,
+        facebook,
         firstMessageDate: firstMessageDate || new Date(),
         followUpDate,
         stage: stage || 'new',
         status: status || 'warm',
         budget: budget || 0,
         remark,
+        address,
         probability: probability || 0,
         isArchived: false,
         createdAt: new Date(),
@@ -404,12 +413,15 @@ exports.updateLead = async (req, res) => {
       whatsapp,
       email,
       instagram,
+      website,
+      facebook,
       firstMessageDate,
       followUpDate,
       stage,
       status,
       budget,
       remark,
+      address,
       probability,
     } = req.body;
 
@@ -423,6 +435,8 @@ exports.updateLead = async (req, res) => {
     if (whatsapp !== undefined) updateData.whatsapp = whatsapp;
     if (email !== undefined) updateData.email = email;
     if (instagram !== undefined) updateData.instagram = instagram;
+    if (website !== undefined) updateData.website = website;
+    if (facebook !== undefined) updateData.facebook = facebook;
     if (firstMessageDate !== undefined) updateData.firstMessageDate = firstMessageDate;
     if (followUpDate !== undefined) updateData.followUpDate = followUpDate;
     if (stage !== undefined) updateData.stage = stage;
@@ -719,6 +733,227 @@ exports.bulkUpdateLeads = async (req, res) => {
     });
   } catch (error) {
     console.error('Error in bulk update:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server Error',
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * @desc    Get dashboard KPI metrics
+ * @route   GET /api/v1/leads/dashboard/kpi
+ * @access  Private
+ */
+exports.getDashboardKPI = async (req, res) => {
+  try {
+    // Check if MongoDB is connected
+    const isMongoConnected = mongoose.connection.readyState === 1;
+    
+    if (!isMongoConnected) {
+      // Development mode: return mock KPI data
+      console.warn('⚠️ MongoDB not connected. Returning mock KPI data for development.');
+      
+      const mockKPIs = {
+          totalLeads: 1248,
+          conversionRate: 24.8,
+          activeDeals: 48,
+          totalRevenue: 24500,
+          revenueGoal: 100000,
+          leadsByDistrict: [
+            { district: 'Central Delhi', count: 320 },
+            { district: 'South Delhi', count: 280 },
+            { district: 'North Delhi', count: 210 },
+            { district: 'West Delhi', count: 190 },
+            { district: 'East Delhi', count: 150 },
+            { district: 'New Delhi', count: 98 },
+          ],
+          monthlyRevenueTrend: [
+            { month: 'Jan', revenue: 18000 },
+            { month: 'Feb', revenue: 22000 },
+            { month: 'Mar', revenue: 19500 },
+            { month: 'Apr', revenue: 24500 },
+            { month: 'May', revenue: 21000 },
+            { month: 'Jun', revenue: 23000 },
+          ],
+          recentActivities: [
+            { type: 'stage_update', message: 'Lead "ABC Restaurant" moved to "Live" stage', timestamp: new Date(Date.now() - 3600000) },
+            { type: 'payment_received', message: 'Payment of $2,500 received from "XYZ Salon"', timestamp: new Date(Date.now() - 7200000) },
+            { type: 'new_lead', message: 'New lead added: "PQR Gym" from South Delhi', timestamp: new Date(Date.now() - 10800000) },
+            { type: 'follow_up', message: 'Follow-up scheduled for "LMN Clinic" tomorrow', timestamp: new Date(Date.now() - 14400000) },
+          ],
+          recentClosedDeals: [
+            { businessName: 'Global Solutions', stage: 'closed', budget: 12500, timestamp: new Date(Date.now() - 3600000) },
+            { businessName: 'TechCorp Inc', stage: 'closed', budget: 8500, timestamp: new Date(Date.now() - 7200000) },
+            { businessName: 'Marketing Pro Ltd', stage: 'closed', budget: 9200, timestamp: new Date(Date.now() - 10800000) },
+            { businessName: 'Foodie Restaurant', stage: 'closed', budget: 5600, timestamp: new Date(Date.now() - 14400000) },
+            { businessName: 'Fitness Gym', stage: 'closed', budget: 7200, timestamp: new Date(Date.now() - 18000000) }
+          ],
+          recentPayments: [
+            { clientName: 'XYZ Salon', receivedAmount: 2500, paymentMethod: 'bank_transfer', timestamp: new Date(Date.now() - 3600000) },
+            { clientName: 'ABC Restaurant', receivedAmount: 1800, paymentMethod: 'upi', timestamp: new Date(Date.now() - 7200000) },
+            { clientName: 'Global Solutions', receivedAmount: 5000, paymentMethod: 'bank_transfer', timestamp: new Date(Date.now() - 10800000) },
+            { clientName: 'TechCorp Inc', receivedAmount: 3200, paymentMethod: 'credit_card', timestamp: new Date(Date.now() - 14400000) },
+            { clientName: 'Marketing Pro Ltd', receivedAmount: 4200, paymentMethod: 'bank_transfer', timestamp: new Date(Date.now() - 18000000) }
+          ]
+        };
+
+      return res.status(200).json({
+        success: true,
+        data: mockKPIs,
+        message: 'Dashboard KPI metrics retrieved (mock mode)',
+        warning: 'MongoDB not connected - using mock data',
+      });
+    }
+
+    // Get total leads (non-archived)
+    const totalLeads = await Lead.countDocuments({ isArchived: false });
+    
+    // Get conversion rate: percentage of leads in 'closed' stage
+    const closedLeads = await Lead.countDocuments({
+      isArchived: false,
+      stage: 'closed'
+    });
+    const conversionRate = totalLeads > 0 ? (closedLeads / totalLeads * 100).toFixed(1) : 0;
+    
+    // Get active deals: leads in 'Designing' or 'Development' stage
+    // Note: Based on the requirement, we need to check for 'Designing' or 'Development' stages
+    // but our current Lead model has stages: ['new', 'contacted', 'replied', 'demo_sent', 'closed']
+    // We'll need to adjust this based on actual stage values
+    const activeDeals = await Lead.countDocuments({
+      isArchived: false,
+      stage: { $in: ['demo_sent', 'replied'] } // Using closest matches
+    });
+    
+    // Get total revenue: sum of 'receivedAmount' from all payments
+    const Payment = require('../models/Payment');
+    const revenueStats = await Payment.aggregate([
+      { $match: { isArchived: false } },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$receivedAmount' }
+        }
+      }
+    ]);
+    const totalRevenue = revenueStats[0]?.totalRevenue || 0;
+    
+    // Get leads by district
+    const leadsByDistrict = await Lead.aggregate([
+      { $match: { isArchived: false } },
+      {
+        $group: {
+          _id: '$district',
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+    
+    // Get monthly revenue trend (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    const monthlyRevenueTrend = await Payment.aggregate([
+      {
+        $match: {
+          isArchived: false,
+          paymentDate: { $gte: sixMonthsAgo }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$paymentDate' },
+            month: { $month: '$paymentDate' }
+          },
+          revenue: { $sum: '$receivedAmount' }
+        }
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } },
+      { $limit: 6 }
+    ]);
+    
+    // Format monthly revenue trend
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const formattedMonthlyTrend = monthlyRevenueTrend.map(item => ({
+      month: monthNames[item._id.month - 1],
+      revenue: item.revenue
+    }));
+    
+    // Get recent closed deals (leads with stage 'closed')
+    const recentClosedDeals = await Lead.find({
+      isArchived: false,
+      stage: 'closed'
+    })
+      .sort({ updatedAt: -1 })
+      .limit(5)
+      .select('businessName stage updatedAt budget');
+    
+    // Get recent payments (all payments, assuming they are 'received')
+    const recentPayments = await Payment.find({ isArchived: false })
+      .sort({ paymentDate: -1 })
+      .limit(5)
+      .select('clientName receivedAmount paymentDate paymentMethod');
+    
+    // Build combined recent activities for backward compatibility
+    const recentActivities = [];
+    
+    // Add closed deals as activities
+    recentClosedDeals.forEach(lead => {
+      recentActivities.push({
+        type: 'deal_closed',
+        message: `Deal closed: "${lead.businessName}" with budget ₹${lead.budget?.toLocaleString() || 'N/A'}`,
+        timestamp: lead.updatedAt
+      });
+    });
+    
+    // Add payment activities
+    recentPayments.forEach(payment => {
+      recentActivities.push({
+        type: 'payment_received',
+        message: `Payment of ₹${payment.receivedAmount.toLocaleString()} received from "${payment.clientName}" via ${payment.paymentMethod}`,
+        timestamp: payment.paymentDate
+      });
+    });
+    
+    // Sort by timestamp and limit to 10
+    recentActivities.sort((a, b) => b.timestamp - a.timestamp);
+    const topRecentActivities = recentActivities.slice(0, 10);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalLeads,
+        conversionRate: parseFloat(conversionRate),
+        activeDeals,
+        totalRevenue,
+        revenueGoal: 100000, // Default monthly revenue goal
+        leadsByDistrict: leadsByDistrict.map(item => ({
+          district: item._id || 'Unknown',
+          count: item.count
+        })),
+        monthlyRevenueTrend: formattedMonthlyTrend,
+        recentActivities: topRecentActivities,
+        recentClosedDeals: recentClosedDeals.map(deal => ({
+          businessName: deal.businessName,
+          stage: deal.stage,
+          budget: deal.budget,
+          timestamp: deal.updatedAt
+        })),
+        recentPayments: recentPayments.map(payment => ({
+          clientName: payment.clientName,
+          receivedAmount: payment.receivedAmount,
+          paymentMethod: payment.paymentMethod,
+          timestamp: payment.paymentDate
+        }))
+      },
+      message: 'Dashboard KPI metrics retrieved successfully',
+    });
+  } catch (error) {
+    console.error('❌ Error fetching dashboard KPI metrics:', error);
     res.status(500).json({
       success: false,
       error: 'Server Error',

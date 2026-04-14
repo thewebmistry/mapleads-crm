@@ -90,7 +90,6 @@ const healthRoutes = require('./routes/health.routes');
 const authRoutes = require('./routes/auth.routes');
 const leadRoutes = require('./routes/lead.routes');
 const reminderRoutes = require('./routes/reminder.routes');
-const scraperRoutes = require('./routes/scraper.routes');
 const paymentRoutes = require('./routes/payment.routes');
 
 // ======================
@@ -109,8 +108,6 @@ app.use(`/api/${API_VERSION}/leads`, leadRoutes);
 // Reminder routes
 app.use(`/api/${API_VERSION}/reminders`, reminderRoutes);
 
-// Scraper routes
-app.use(`/api/${API_VERSION}/scraper`, scraperRoutes);
 
 // Payment routes
 app.use(`/api/${API_VERSION}/payments`, paymentRoutes);
@@ -131,8 +128,6 @@ app.get(`/api/${API_VERSION}`, (req, res) => {
       'leads-stats': `/api/${API_VERSION}/leads/stats/summary`,
       'leads-follow-ups': `/api/${API_VERSION}/leads/follow-ups`,
       reminders: `/api/${API_VERSION}/reminders`,
-      scraper: `/api/${API_VERSION}/scraper`,
-      'scraper-maps-search': `/api/${API_VERSION}/scraper/maps-search`,
       payments: `/api/${API_VERSION}/payments`,
       'payments-stats': `/api/${API_VERSION}/payments/stats/summary`,
       users: `/api/${API_VERSION}/users`,

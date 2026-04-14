@@ -206,12 +206,6 @@
                 <a href="leads.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group hover:translate-x-1">
                     <i class="fas fa-users w-5 mr-3 group-hover:scale-110 transition-transform"></i>Leads
                 </a>
-                <a href="map-finder.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group hover:translate-x-1">
-                    <i class="fas fa-map-pin w-5 mr-3 group-hover:scale-110 transition-transform"></i>Map Finder
-                </a>
-                <a href="kanban.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group hover:translate-x-1">
-                    <i class="fas fa-columns w-5 mr-3 group-hover:scale-110 transition-transform"></i>Kanban
-                </a>
                 <a href="analytics.html" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 transition-all duration-200 group hover:translate-x-1">
                     <i class="fas fa-chart-line w-5 mr-3 group-hover:scale-110 transition-transform"></i>Analytics
                 </a>
@@ -311,6 +305,21 @@
                                     <div>
                                         <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1.5">Default Message</label>
                                         <textarea id="default-message" name="default_message" rows="2" placeholder="Enter your default message for leads..." class="w-full px-4 py-2.5 bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-transparent outline-none transition-all resize-none"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1.5">Template A (New Leads)</label>
+                                        <textarea id="template-a" name="template_a" rows="2" placeholder="Enter template for leads with no website..." class="w-full px-4 py-2.5 bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-transparent outline-none transition-all resize-none"></textarea>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Used for leads with no website. Use variables: {business}, {owner}, {district}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1.5">Template B (Follow-up)</label>
+                                        <textarea id="template-b" name="template_b" rows="2" placeholder="Enter template for leads in 'Proposal' or 'Contacted' stage..." class="w-full px-4 py-2.5 bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-transparent outline-none transition-all resize-none"></textarea>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Used for leads in 'Contacted' or 'Proposal' stage. Use variables: {business}, {owner}, {district}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1.5">Portfolio Link</label>
+                                        <input type="url" id="portfolio-link" name="portfolio_link" value="" placeholder="https://yourportfolio.com" class="w-full px-4 py-2.5 bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-transparent outline-none transition-all">
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">This link will be included in WhatsApp messages to showcase your work.</p>
                                     </div>
                                 </div>
                             </div>
@@ -467,9 +476,109 @@
             return true;
         }
 
+        // Communication settings save/load functionality
+        function loadCommunicationSettings() {
+            // Load WhatsApp number
+            const whatsappNumber = localStorage.getItem('mapleads_whatsapp_number');
+            if (whatsappNumber && document.getElementById('whatsapp-number')) {
+                document.getElementById('whatsapp-number').value = whatsappNumber;
+            }
+            
+            // Load default message
+            const defaultMessage = localStorage.getItem('mapleads_default_message');
+            if (defaultMessage && document.getElementById('default-message')) {
+                document.getElementById('default-message').value = defaultMessage;
+            }
+            
+            // Load template A
+            const templateA = localStorage.getItem('mapleads_template_a');
+            if (templateA && document.getElementById('template-a')) {
+                document.getElementById('template-a').value = templateA;
+            }
+            
+            // Load template B
+            const templateB = localStorage.getItem('mapleads_template_b');
+            if (templateB && document.getElementById('template-b')) {
+                document.getElementById('template-b').value = templateB;
+            }
+            
+            // Load portfolio link
+            const portfolioLink = localStorage.getItem('mapleads_portfolio_link');
+            if (portfolioLink && document.getElementById('portfolio-link')) {
+                document.getElementById('portfolio-link').value = portfolioLink;
+            }
+            
+            // Load agency profile settings
+            const agencyName = localStorage.getItem('mapleads_agency_name');
+            if (agencyName && document.getElementById('agency-name')) {
+                document.getElementById('agency-name').value = agencyName;
+            }
+            
+            const ownerName = localStorage.getItem('mapleads_owner_name');
+            if (ownerName && document.getElementById('owner-name')) {
+                document.getElementById('owner-name').value = ownerName;
+            }
+            
+            const agencyEmail = localStorage.getItem('mapleads_agency_email');
+            if (agencyEmail && document.getElementById('agency-email')) {
+                document.getElementById('agency-email').value = agencyEmail;
+            }
+        }
+
+        function saveCommunicationSettings() {
+            // Save WhatsApp number
+            const whatsappNumberInput = document.getElementById('whatsapp-number');
+            if (whatsappNumberInput) {
+                localStorage.setItem('mapleads_whatsapp_number', whatsappNumberInput.value.trim());
+            }
+            
+            // Save default message
+            const defaultMessageInput = document.getElementById('default-message');
+            if (defaultMessageInput) {
+                localStorage.setItem('mapleads_default_message', defaultMessageInput.value.trim());
+            }
+            
+            // Save template A
+            const templateAInput = document.getElementById('template-a');
+            if (templateAInput) {
+                localStorage.setItem('mapleads_template_a', templateAInput.value.trim());
+            }
+            
+            // Save template B
+            const templateBInput = document.getElementById('template-b');
+            if (templateBInput) {
+                localStorage.setItem('mapleads_template_b', templateBInput.value.trim());
+            }
+            
+            // Save portfolio link
+            const portfolioLinkInput = document.getElementById('portfolio-link');
+            if (portfolioLinkInput) {
+                localStorage.setItem('mapleads_portfolio_link', portfolioLinkInput.value.trim());
+            }
+            
+            // Save agency profile settings
+            const agencyNameInput = document.getElementById('agency-name');
+            if (agencyNameInput) {
+                localStorage.setItem('mapleads_agency_name', agencyNameInput.value.trim());
+            }
+            
+            const ownerNameInput = document.getElementById('owner-name');
+            if (ownerNameInput) {
+                localStorage.setItem('mapleads_owner_name', ownerNameInput.value.trim());
+            }
+            
+            const agencyEmailInput = document.getElementById('agency-email');
+            if (agencyEmailInput) {
+                localStorage.setItem('mapleads_agency_email', agencyEmailInput.value.trim());
+            }
+            
+            return true;
+        }
+
         // Initialize districts on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', function() {
             loadDistricts();
+            loadCommunicationSettings();
             
             // Attach save handler to district save button
             const districtsSaveBtn = getDistrictsSaveButton();
@@ -501,6 +610,8 @@
                     button.disabled = true;
                     
                     setTimeout(() => {
+                        // Save communication settings
+                        saveCommunicationSettings();
                         button.innerHTML = '<i class="fas fa-check mr-2"></i>Saved!';
                         setTimeout(() => {
                             button.innerHTML = originalText;

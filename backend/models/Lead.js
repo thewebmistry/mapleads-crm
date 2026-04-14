@@ -10,7 +10,6 @@ const leadSchema = new mongoose.Schema(
     },
     ownerName: {
       type: String,
-      required: [true, 'Owner name is required'],
       trim: true,
       maxlength: [100, 'Owner name cannot exceed 100 characters'],
     },
@@ -22,26 +21,31 @@ const leadSchema = new mongoose.Schema(
     },
     businessType: {
       type: String,
-      enum: ['restaurant', 'salon', 'gym', 'clinic', 'school', 'hotel', 'real_estate', 'coaching'],
-      default: 'restaurant',
     },
     mapsLink: {
       type: String,
       trim: true,
-      match: [/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/, 'Please enter a valid URL'],
     },
     whatsapp: {
       type: String,
       trim: true,
-      match: [/^\+?[1-9]\d{1,14}$/, 'Please enter a valid WhatsApp number in E.164 format'],
+      match: [/^\+?[1-9]\d{1,14}$|^$/, 'Please enter a valid WhatsApp number in E.164 format'],
     },
     email: {
       type: String,
       trim: true,
       lowercase: true,
-      match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email'],
+      match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$|^$/, 'Please enter a valid email'],
     },
     instagram: {
+      type: String,
+      trim: true,
+    },
+    website: {
+      type: String,
+      trim: true,
+    },
+    facebook: {
       type: String,
       trim: true,
     },
@@ -71,6 +75,12 @@ const leadSchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxlength: [500, 'Remark cannot exceed 500 characters'],
+      default: '',
+    },
+    address: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Address cannot exceed 500 characters'],
       default: '',
     },
     probability: {
@@ -169,7 +179,9 @@ leadSchema.pre(/^find/, function(next) {
   if (this.getFilter().isArchived === undefined) {
     this.where({ isArchived: false });
   }
-  next();
+  if (typeof next === 'function') {
+    next();
+  }
 });
 
 const Lead = mongoose.model('Lead', leadSchema);

@@ -213,7 +213,7 @@
             if (sidebar) {
                 // Remove hidden class and add mobile-specific classes
                 AppUtils.removeClass(sidebar, 'hidden');
-                AppUtils.addClass(sidebar, 'fixed', 'inset-y-0', 'left-0', 'z-60', 'lg:hidden', 'max-w-full');
+                AppUtils.addClass(sidebar, 'fixed', 'inset-y-0', 'left-0', 'z-50', 'lg:hidden', 'max-w-full', 'pointer-events-auto');
                 // Start off-screen
                 AppUtils.addClass(sidebar, '-translate-x-full');
                 // Force reflow to ensure transition works
@@ -241,7 +241,7 @@
                 setTimeout(() => {
                     if (AppUtils.hasClass(sidebar, '-translate-x-full')) {
                         AppUtils.addClass(sidebar, 'hidden');
-                        AppUtils.removeClass(sidebar, 'fixed', 'inset-y-0', 'left-0', 'z-60', 'lg:hidden', 'max-w-full', '-translate-x-full');
+                        AppUtils.removeClass(sidebar, 'fixed', 'inset-y-0', 'left-0', 'z-50', 'lg:hidden', 'max-w-full', '-translate-x-full', 'pointer-events-auto');
                     }
                 }, 300); // Match transition duration
             }

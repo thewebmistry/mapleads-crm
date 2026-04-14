@@ -18,6 +18,7 @@ const {
   getLeadStats,
   getLeadsWithFollowUps,
   bulkUpdateLeads,
+  getDashboardKPI,
 } = require('../controllers/leadController');
 const { authenticateToken, requireAdminOrAgent } = require('../middleware/authMiddleware');
 const { validateLead, validatePagination } = require('../middleware/validationMiddleware');
@@ -42,6 +43,13 @@ router.get('/', validatePagination, getAllLeads);
  * @access  Private (Admin or Agent)
  */
 router.get('/stats/summary', authenticateToken, requireAdminOrAgent, getLeadStats);
+
+/**
+ * @route   GET /api/v1/leads/dashboard/kpi
+ * @desc    Get dashboard KPI metrics
+ * @access  Private (Admin or Agent)
+ */
+router.get('/dashboard/kpi', authenticateToken, requireAdminOrAgent, getDashboardKPI);
 
 /**
  * @route   GET /api/v1/leads/follow-ups

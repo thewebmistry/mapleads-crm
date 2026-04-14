@@ -311,12 +311,6 @@
                 <a href="leads.html" class="flex items-center px-5 py-4 text-sm font-semibold rounded-2xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 hover-lift group transition-all duration-200">
                     <i class="fas fa-users w-5 mr-3 text-lg group-hover:scale-110 transition-transform"></i>Leads
                 </a>
-                <a href="map-finder.html" class="flex items-center px-5 py-4 text-sm font-semibold rounded-2xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 hover-lift group transition-all duration-200">
-                    <i class="fas fa-map-pin w-5 mr-3 text-lg group-hover:scale-110 transition-transform"></i>Map Finder
-                </a>
-                <a href="kanban.html" class="flex items-center px-5 py-4 text-sm font-semibold rounded-2xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 hover-lift group transition-all duration-200">
-                    <i class="fas fa-columns w-5 mr-3 text-lg group-hover:scale-110 transition-transform"></i>Kanban
-                </a>
                 <a href="analytics.html" class="flex items-center px-5 py-4 text-sm font-semibold rounded-2xl text-gray-700 dark:text-slate-200 hover:bg-secondary-50 dark:hover:bg-slate-800 hover:text-primary-700 dark:hover:text-primary-300 hover-lift group transition-all duration-200">
                     <i class="fas fa-chart-line w-5 mr-3 text-lg group-hover:scale-110 transition-transform"></i>Analytics
                 </a>
@@ -364,7 +358,7 @@
                                         <i class="fas fa-users text-white text-xl"></i>
                                     </div>
                                 </div>
-                                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                                <h3 id="kpi-total-leads" class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                                     1,248
                                 </h3>
                                 <div class="flex items-center justify-between">
@@ -395,7 +389,7 @@
                                         <i class="fas fa-chart-line text-white text-xl"></i>
                                     </div>
                                 </div>
-                                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                                <h3 id="kpi-conversion-rate" class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                                     24.8%
                                 </h3>
                                 <div class="flex items-center justify-between">
@@ -426,7 +420,7 @@
                                         <i class="fas fa-handshake text-white text-xl"></i>
                                     </div>
                                 </div>
-                                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                                <h3 id="kpi-active-deals" class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                                     48
                                 </h3>
                                 <div class="flex items-center justify-between">
@@ -457,7 +451,7 @@
                                         <i class="fas fa-dollar-sign text-white text-xl"></i>
                                     </div>
                                 </div>
-                                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                                <h3 id="kpi-revenue" class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                                     $24.5K
                                 </h3>
                                 <div class="flex items-center justify-between">
@@ -474,6 +468,43 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Revenue Goal Tracker Card -->
+                <div class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-6 shadow-2xl mb-8 animate-fade-in" style="animation-delay: 0.4s">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-white mb-1">Agency Monthly Goal</h2>
+                            <p class="text-indigo-100 text-sm">Track your revenue progress against monthly target</p>
+                        </div>
+                        <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                            <i class="fas fa-bullseye text-white text-2xl"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-white font-semibold">Progress</span>
+                            <span class="text-white font-bold text-xl" id="goal-percentage">0%</span>
+                        </div>
+                        <div class="h-4 bg-white/30 rounded-full overflow-hidden">
+                            <div id="goal-progress-bar" class="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm mt-2">
+                            <span class="text-indigo-100">Collected: <span id="goal-collected" class="font-bold">₹0</span></span>
+                            <span class="text-indigo-100">Target: <span id="goal-target" class="font-bold">₹1,00,000</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="text-white">
+                            <div class="text-sm opacity-90">Remaining to reach goal</div>
+                            <div class="text-2xl font-bold" id="goal-remaining">₹1,00,000</div>
+                        </div>
+                        <button id="goal-settings-btn" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center">
+                            <i class="fas fa-cog mr-2"></i> Adjust Goal
+                        </button>
                     </div>
                 </div>
 
@@ -494,7 +525,7 @@
                         </a>
                     </div>
 
-                    <div class="space-y-4">
+                    <div id="recent-activities-container" class="space-y-4">
                         <!-- Activity 1 -->
                         <div class="flex items-start p-4 rounded-xl bg-secondary-50 dark:bg-secondary-900/50 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors">
                             <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-primary-700 to-primary-900 flex items-center justify-center text-white mr-4">
@@ -586,5 +617,399 @@
             </div>
         </main>
     </div>
+
+    <!-- Dashboard Data Fetching Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to fetch dashboard KPI data
+            async function fetchDashboardData() {
+                try {
+                    const response = await fetch('/api/v1/leads/dashboard/kpi');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        updateKPICards(data.data);
+                        updateRecentActivities(data.data);
+                        
+                        // If we have charts data, update them
+                        if (data.data.leadsByDistrict && data.data.monthlyRevenueTrend) {
+                            updateCharts(data.data);
+                        }
+                    } else {
+                        console.error('Failed to fetch dashboard data:', data.message);
+                        // Fallback to mock data or show error
+                        showMockData();
+                    }
+                } catch (error) {
+                    console.error('Error fetching dashboard data:', error);
+                    // Fallback to mock data
+                    showMockData();
+                }
+            }
+
+            // Function to update KPI cards with real data
+            function updateKPICards(kpiData) {
+                // Update Total Leads
+                const totalLeadsElement = document.getElementById('kpi-total-leads');
+                if (totalLeadsElement && kpiData.totalLeads !== undefined) {
+                    totalLeadsElement.textContent = kpiData.totalLeads.toLocaleString();
+                    animateCounter(totalLeadsElement, kpiData.totalLeads);
+                }
+
+                // Update Conversion Rate
+                const conversionRateElement = document.getElementById('kpi-conversion-rate');
+                if (conversionRateElement && kpiData.conversionRate !== undefined) {
+                    conversionRateElement.textContent = `${kpiData.conversionRate.toFixed(1)}%`;
+                    animateCounter(conversionRateElement, kpiData.conversionRate);
+                }
+
+                // Update Active Deals
+                const activeDealsElement = document.getElementById('kpi-active-deals');
+                if (activeDealsElement && kpiData.activeDeals !== undefined) {
+                    activeDealsElement.textContent = kpiData.activeDeals.toLocaleString();
+                    animateCounter(activeDealsElement, kpiData.activeDeals);
+                }
+
+                // Update Revenue
+                const revenueElement = document.getElementById('kpi-revenue');
+                if (revenueElement && kpiData.totalRevenue !== undefined) {
+                    const revenueInK = kpiData.totalRevenue >= 1000 ?
+                        `$${(kpiData.totalRevenue / 1000).toFixed(1)}K` :
+                        `$${kpiData.totalRevenue.toLocaleString()}`;
+                    revenueElement.textContent = revenueInK;
+                }
+
+                // Update Revenue Goal Tracker
+                updateGoalTracker(kpiData.totalRevenue, kpiData.revenueGoal);
+            }
+
+            // Function to update Revenue Goal Tracker
+            function updateGoalTracker(collected, goal) {
+                const collectedAmount = collected || 0;
+                const goalAmount = goal || 100000;
+                
+                // Calculate percentage
+                const percentage = goalAmount > 0 ? Math.min(100, (collectedAmount / goalAmount) * 100) : 0;
+                const remaining = Math.max(0, goalAmount - collectedAmount);
+                
+                // Update UI elements
+                const percentageElement = document.getElementById('goal-percentage');
+                const progressBar = document.getElementById('goal-progress-bar');
+                const collectedElement = document.getElementById('goal-collected');
+                const targetElement = document.getElementById('goal-target');
+                const remainingElement = document.getElementById('goal-remaining');
+                
+                if (percentageElement) {
+                    percentageElement.textContent = `${percentage.toFixed(1)}%`;
+                }
+                if (progressBar) {
+                    // Animate width transition
+                    progressBar.style.width = `${percentage}%`;
+                }
+                if (collectedElement) {
+                    collectedElement.textContent = `₹${collectedAmount.toLocaleString()}`;
+                }
+                if (targetElement) {
+                    targetElement.textContent = `₹${goalAmount.toLocaleString()}`;
+                }
+                if (remainingElement) {
+                    remainingElement.textContent = `₹${remaining.toLocaleString()}`;
+                }
+                
+                // Add visual feedback based on progress
+                if (percentage >= 100) {
+                    progressBar.classList.remove('from-green-400', 'to-emerald-500');
+                    progressBar.classList.add('from-yellow-400', 'to-amber-500');
+                } else if (percentage >= 75) {
+                    progressBar.classList.remove('from-green-400', 'to-emerald-500');
+                    progressBar.classList.add('from-green-400', 'to-teal-500');
+                } else {
+                    progressBar.classList.remove('from-yellow-400', 'to-amber-500', 'from-green-400', 'to-teal-500');
+                    progressBar.classList.add('from-green-400', 'to-emerald-500');
+                }
+            }
+
+            // Helper function to check if a follow-up date is due today or overdue
+            function getFollowUpBadge(followUpDate) {
+                if (!followUpDate) return null;
+                
+                // Parse the follow-up date (expected format: YYYY-MM-DD)
+                const followUp = new Date(followUpDate);
+                if (isNaN(followUp.getTime())) return null;
+                
+                // Get today's date at midnight for comparison
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                // Set follow-up date to midnight for accurate comparison
+                const followUpMidnight = new Date(followUp);
+                followUpMidnight.setHours(0, 0, 0, 0);
+                
+                // Calculate difference in days
+                const diffTime = followUpMidnight.getTime() - today.getTime();
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                // Determine badge based on date comparison
+                if (diffDays === 0) {
+                    return 'due_today';
+                } else if (diffDays < 0) {
+                    return 'overdue';
+                }
+                
+                return null;
+            }
+
+            // Function to fetch due/overdue follow-ups from leads API
+            async function fetchDueFollowUps() {
+                try {
+                    const response = await fetch('/api/v1/leads');
+                    if (!response.ok) throw new Error('Failed to fetch leads');
+                    const result = await response.json();
+                    if (!result.success) return [];
+                    
+                    const leads = result.data || [];
+                    const dueFollowUps = [];
+                    
+                    leads.forEach(lead => {
+                        const status = getFollowUpBadge(lead.followUp);
+                        if (status) {
+                            dueFollowUps.push({
+                                type: status === 'due_today' ? 'follow_up_due' : 'follow_up_overdue',
+                                message: `${lead.business} - ${lead.owner} (${lead.district}) needs follow-up`,
+                                timestamp: new Date(lead.followUp),
+                                lead: lead
+                            });
+                        }
+                    });
+                    
+                    // Sort by date (oldest first for overdue, then due today)
+                    dueFollowUps.sort((a, b) => a.timestamp - b.timestamp);
+                    return dueFollowUps.slice(0, 5); // Limit to 5
+                } catch (error) {
+                    console.error('Error fetching due follow-ups:', error);
+                    return [];
+                }
+            }
+
+            // Function to update recent activities with payments, closed deals, and due follow-ups
+            async function updateRecentActivities(data) {
+                const container = document.getElementById('recent-activities-container');
+                if (!container) return;
+
+                // Clear existing activities
+                container.innerHTML = '';
+
+                // Get recent payments and closed deals from data
+                const payments = data.recentPayments || [];
+                const closedDeals = data.recentClosedDeals || [];
+                
+                // Fetch due follow-ups
+                const dueFollowUps = await fetchDueFollowUps();
+                
+                // Combine and sort by timestamp (newest first)
+                const allActivities = [];
+                
+                payments.forEach(payment => {
+                    allActivities.push({
+                        type: 'payment_received',
+                        message: `Payment of ₹${payment.receivedAmount?.toLocaleString() || '0'} received from "${payment.clientName}" via ${payment.paymentMethod}`,
+                        timestamp: new Date(payment.timestamp)
+                    });
+                });
+                
+                closedDeals.forEach(deal => {
+                    allActivities.push({
+                        type: 'deal_closed',
+                        message: `Deal closed: "${deal.businessName}" with budget ₹${deal.budget?.toLocaleString() || 'N/A'}`,
+                        timestamp: new Date(deal.timestamp)
+                    });
+                });
+                
+                dueFollowUps.forEach(followUp => {
+                    allActivities.push({
+                        type: followUp.type,
+                        message: followUp.message,
+                        timestamp: followUp.timestamp
+                    });
+                });
+                
+                // Sort by timestamp descending (most recent first)
+                allActivities.sort((a, b) => b.timestamp - a.timestamp);
+                
+                // Take only latest 10 activities
+                const displayActivities = allActivities.slice(0, 10);
+                
+                if (displayActivities.length === 0) {
+                    // Show empty state
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-inbox text-4xl mb-4 opacity-50"></i>
+                            <p class="text-lg font-medium">No recent activities</p>
+                            <p class="text-sm">Payments, closed deals, and follow-ups will appear here</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Add new activities
+                displayActivities.forEach(activity => {
+                    const activityElement = createActivityElement(activity);
+                    container.appendChild(activityElement);
+                });
+            }
+
+            // Function to create activity element
+            function createActivityElement(activity) {
+                const div = document.createElement('div');
+                div.className = 'flex items-start p-4 rounded-xl bg-secondary-50 dark:bg-secondary-900/50 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors';
+                
+                // Determine icon and color based on activity type
+                let iconClass = 'fas fa-info-circle';
+                let gradientClass = 'from-primary-700 to-primary-900';
+                
+                if (activity.type === 'stage_update') {
+                    iconClass = 'fas fa-exchange-alt';
+                    gradientClass = 'from-blue-700 to-blue-900';
+                } else if (activity.type === 'payment_received') {
+                    iconClass = 'fas fa-dollar-sign';
+                    gradientClass = 'from-green-700 to-green-900';
+                } else if (activity.type === 'new_lead') {
+                    iconClass = 'fas fa-user-plus';
+                    gradientClass = 'from-purple-700 to-purple-900';
+                } else if (activity.type === 'follow_up') {
+                    iconClass = 'fas fa-calendar-check';
+                    gradientClass = 'from-yellow-700 to-yellow-900';
+                } else if (activity.type === 'follow_up_due') {
+                    iconClass = 'fas fa-exclamation-circle';
+                    gradientClass = 'from-amber-700 to-amber-900';
+                } else if (activity.type === 'follow_up_overdue') {
+                    iconClass = 'fas fa-clock';
+                    gradientClass = 'from-red-700 to-red-900';
+                } else if (activity.type === 'deal_closed') {
+                    iconClass = 'fas fa-handshake';
+                    gradientClass = 'from-emerald-700 to-emerald-900';
+                }
+
+                // Format timestamp
+                const timestamp = new Date(activity.timestamp);
+                const timeAgo = getTimeAgo(timestamp);
+
+                div.innerHTML = `
+                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r ${gradientClass} flex items-center justify-center text-white mr-4">
+                        <i class="${iconClass}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <p class="font-medium text-secondary-900 dark:text-white">
+                                ${getActivityTitle(activity.type)}
+                            </p>
+                            <span class="text-xs text-secondary-500 dark:text-secondary-400">
+                                ${timeAgo}
+                            </span>
+                        </div>
+                        <p class="text-sm text-secondary-600 dark:text-secondary-400 mt-1">
+                            ${activity.message}
+                        </p>
+                    </div>
+                `;
+
+                return div;
+            }
+
+            // Helper function to get activity title
+            function getActivityTitle(type) {
+                const titles = {
+                    'stage_update': 'Stage Updated',
+                    'payment_received': 'Payment Received',
+                    'new_lead': 'New Lead Added',
+                    'follow_up': 'Follow-up Scheduled',
+                    'follow_up_due': 'Follow-up Due Today',
+                    'follow_up_overdue': 'Follow-up Overdue',
+                    'deal_closed': 'Deal Closed'
+                };
+                return titles[type] || 'Activity';
+            }
+
+            // Helper function to format time ago
+            function getTimeAgo(date) {
+                const seconds = Math.floor((new Date() - date) / 1000);
+                
+                let interval = Math.floor(seconds / 31536000);
+                if (interval >= 1) return interval + ' year' + (interval === 1 ? '' : 's') + ' ago';
+                
+                interval = Math.floor(seconds / 2592000);
+                if (interval >= 1) return interval + ' month' + (interval === 1 ? '' : 's') + ' ago';
+                
+                interval = Math.floor(seconds / 86400);
+                if (interval >= 1) return interval + ' day' + (interval === 1 ? '' : 's') + ' ago';
+                
+                interval = Math.floor(seconds / 3600);
+                if (interval >= 1) return interval + ' hour' + (interval === 1 ? '' : 's') + ' ago';
+                
+                interval = Math.floor(seconds / 60);
+                if (interval >= 1) return interval + ' minute' + (interval === 1 ? '' : 's') + ' ago';
+                
+                return 'just now';
+            }
+
+            // Function to animate counters
+            function animateCounter(element, target) {
+                let current = 0;
+                const increment = target / 50;
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        // For percentage values, keep decimal formatting
+                        if (element.id === 'kpi-conversion-rate') {
+                            element.textContent = `${target.toFixed(1)}%`;
+                        } else {
+                            element.textContent = Math.round(target).toLocaleString();
+                        }
+                        clearInterval(timer);
+                    } else {
+                        // For percentage values, keep decimal formatting
+                        if (element.id === 'kpi-conversion-rate') {
+                            element.textContent = `${current.toFixed(1)}%`;
+                        } else {
+                            element.textContent = Math.round(current).toLocaleString();
+                        }
+                    }
+                }, 30);
+            }
+
+            // Function to update charts (if we have chart.js integration)
+            function updateCharts(data) {
+                // This would integrate with existing chart.js charts
+                // For now, we'll just log that we have the data
+                console.log('Chart data available:', {
+                    leadsByDistrict: data.leadsByDistrict,
+                    monthlyRevenueTrend: data.monthlyRevenueTrend
+                });
+                
+                // You can integrate with existing chart.js initialization here
+                // For example:
+                // if (window.districtChart) {
+                //     window.districtChart.data.labels = data.leadsByDistrict.map(d => d.district);
+                //     window.districtChart.data.datasets[0].data = data.leadsByDistrict.map(d => d.count);
+                //     window.districtChart.update();
+                // }
+            }
+
+            // Fallback function to show mock data
+            function showMockData() {
+                console.log('Using mock data for dashboard');
+                // You could show a notification or keep the existing static data
+            }
+
+            // Fetch dashboard data on page load
+            fetchDashboardData();
+
+            // Optional: Refresh data every 60 seconds
+            setInterval(fetchDashboardData, 60000);
+        });
+    </script>
 </body>
 </html>
